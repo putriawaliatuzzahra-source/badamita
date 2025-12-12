@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Portal Desa Badamita — Peta Interaktif</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    :root{
+      --bg: #f3fbff;
+      --card: #e9f6ff;
+      --accent: #6aa8ff; /* biru pastel utama */
+      --accent-2: #9dd0ff;
+      --muted: #6b7c8a;
+      --glass: rgba(255,255,255,0.7);
+      --radius: 14px;
+      --shadow: 0 8px 30px rgba(30,80,140,0.08);
+      --soft-shadow: 0 6px 18px rgba(15,55,95,0.06);
+      --glass-border: rgba(110,160,220,0.18);
+    }
+
+    /* Reset & base */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg, var(--bg) 0%, #eef9ff 100%);
+      color:#243142;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.4;
+    }
+
+    /* NAVBAR */
+    header{
+      position:sticky;
+      top:0;
+      z-index:999;
+      backdrop-filter: blur(6px);
+      background: linear-gradient(90deg, rgba(255,255,255,0.55), rgba(255,255,255,0.45));
+      border-bottom: 1px solid rgba(110,160,220,0.12);
+      box-shadow: 0 4px 18px rgba(45,80,120,0.04);
+    }
+    .navbar{
+      max-width:1100px;
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      gap:24px;
+      padding:14px 20px;
+    }
+    .logo{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:700;
+      color:var(--accent);
+      font-size:18px;
+    }
+    .logo .dot{
+      width:40px;height:40px;border-radius:10px;
+      background: linear-gradient(135deg,var(--accent),var(--accent-2));
+      box-shadow: var(--soft-shadow);
+      display:flex;align-items:center;justify-content:center;
+      color:white;font-weight:800;font-size:16px;
+    }
+    .nav-menu{
+      margin-left:auto;
+      display:flex;
+      gap:12px;
+      list-style:none;
+      padding:0;
+      align-items:center;
+    }
+    .nav-menu a{
+      text-decoration:none;
+      color:var(--muted);
+      font-weight:600;
+      padding:8px 12px;
+      border-radius:10px;
+      transition: all .18s ease;
+    }
+    .nav-menu a:hover{ background:rgba(106,168,255,0.12); color:var(--accent); transform:translateY(-2px) }
+
+    /* HERO */
+    .hero{
+      max-width:1100px;
+      margin:28px auto;
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:24px;
+      align-items:center;
+      padding:0 20px 28px;
+    }
+
+    .hero-card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.85));
+      border-radius: var(--radius);
+      padding:28px;
+      box-shadow: var(--shadow);
+      border:1px solid var(--glass-border);
+    }
+    .hero h1{
+      margin:0 0 8px;
+      font-size:28px;
+      color:#07335a;
+    }
+    .hero p{
+      margin:0 0 18px;
+      color:#405b6a;
+    }
+
+    /* Globe container (kanan) */
+    .globe-wrap{
+      width:100%;
+      height:260px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+    }
+    .globe-card{
+      width:200px;height:200px;border-radius:50%;
+      background: radial-gradient(circle at 35% 25%, rgba(255,255,255,0.72), rgba(255,255,255,0.15)),
+                  linear-gradient(180deg, #e7f6ff 0%, #d7efff 100%);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow: 0 10px 30px rgba(20,80,140,0.08), inset 0 -6px 18px rgba(255,255,255,0.3);
+      border: 1px solid rgba(110,180,240,0.12);
+      transform-style:preserve-3d;
+    }
+
+    /* Inline SVG globe rotates */
+    .globe {
+      width:140px;height:140px;
+      transform-origin:center center;
+      animation: spin 8s linear infinite;
+    }
+    @keyframes spin{
+      from{ transform: rotateZ(0deg) }
+      to  { transform: rotateZ(360deg) }
+    }
+    /* subtle floating */
+    .globe-card { animation: floaty 6s ease-in-out infinite; }
+    @keyframes floaty {
+      0% { transform: translateY(0) }
+      50% { transform: translateY(-8px) }
+      100% { transform: translateY(0) }
+    }
+
+    /* CONTENT CARDS */
+    .content{
+      max-width:1100px;
+      margin: 10px auto;
+      padding: 0 20px 40px;
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap:18px;
+    }
+    .card{
+      background:var(--card);
+      border-radius:14px;
+      padding:18px;
+      box-shadow: var(--soft-shadow);
+      border:1px solid rgba(110,160,220,0.06);
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      cursor:pointer;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .card img{ width:46px;height:46px;object-fit:cover;border-radius:10px }
+    .card h2{ margin:0;font-size:16px;color:#0b3b5f }
+    .card p{ margin:6px 0 0;color:#4b656f;font-size:13px }
+    .card:hover{ transform: translateY(-8px); box-shadow: 0 18px 36px rgba(20,80,140,0.06) }
+
+    /* PANELS */
+    .panel{
+      max-width:1100px;
+      margin: 0 auto 40px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.7));
+      border-radius:12px;
+      padding:18px;
+      box-shadow: var(--soft-shadow);
+      border:1px solid rgba(110,160,220,0.06);
+      display:none;
+    }
+
+    /* MAP */
+    #map {
+      width:100%;
+      height:520px;
+      border-radius:10px;
+      overflow:hidden;
+      border:1px solid rgba(20,70,130,0.06);
+    }
+    .map-wrap{
+      position:relative;
+    }
+    .search-box{
+      position:absolute;
+      left:18px;
+      top:18px;
+      z-index:999;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      background:var(--glass);
+      padding:8px;
+      border-radius:12px;
+      box-shadow: 0 8px 26px rgba(18,62,110,0.06);
+      border:1px solid rgba(110,160,220,0.12);
+      backdrop-filter: blur(6px);
+    }
+    .search-box input{
+      width:240px;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid rgba(20,70,130,0.06);
+      outline:none;
+      font-size:14px;
+      background:transparent;
+      color:#07335a;
+    }
+    .btn{ padding:9px 12px;border-radius:10px;background:var(--accent);color:white;border:none;cursor:pointer;font-weight:700; }
+    .btn:hover{ transform:translateY(-2px); box-shadow: 0 8px 20px rgba(100,150,255,0.12) }
+
+    /* modal */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(6,28,45,0.42);
+      display: flex; align-items: center; justify-content: center;
+      opacity:0; pointer-events:none; transition: .22s ease; z-index:9999;
+    }
+    .modal-backdrop.show { opacity:1; pointer-events:all }
+    .modal-box {
+      width:92%; max-width:520px; border-radius:16px;
+      background:white; padding:22px; box-shadow:0 18px 60px rgba(3,28,70,0.18);
+      transform: translateY(30px); opacity:0; transition: .22s ease;
+    }
+    .modal-backdrop.show .modal-box { transform: translateY(0); opacity:1 }
+    .close-btn { position:absolute; right:18px; top:10px; cursor:pointer; font-size:26px; color:#3b5560 }
+
+    label{ display:block; margin:10px 0 6px; font-weight:600; color:#274055 }
+    input[type="email"], input[type="text"], select, textarea {
+      width:100%; padding:12px 14px; border-radius:10px; border:1.6px solid rgba(20,70,120,0.06);
+      background:#fbfeff; outline:none; font-size:14px; color:#10304a;
+    }
+    .btn-submit{
+      width:100%; padding:12px; border-radius:12px; border:none; background: linear-gradient(90deg,var(--accent),var(--accent-2));
+      color:white; font-weight:800; font-size:15px; margin-top:12px; cursor:pointer;
+    }
+
+    footer{
+      text-align:center; padding:28px 18px; color:#5c7686; font-size:14px;
+    }
+
+    /* responsive */
+    @media (max-width:980px){
+      .hero{ grid-template-columns: 1fr; gap:16px; }
+      .globe-wrap{ order:-1 }
+      .search-box input{ width:160px }
+      #map{ height:420px }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <header>
+    <nav class="navbar">
+      <div class="logo">
+        <div class="dot">BD</div>
+        <div>Maps Badamita</div>
+      </div>
+
+      <ul class="nav-menu">
+        <li><a href="#beranda">Beranda</a></li>
+        <li><a href="#peta" id="linkPeta">Peta</a></li>
+        <li><a href="#lokasi">Tanya Lokasi</a></li>
+        <li><a href="#tentang">Tentang</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <main>
+    <section id="beranda" class="hero">
+      <div class="hero-card">
+        <h1>Peta Interaktif Desa Badamita</h1>
+        <p>Temukan lokasi, fasilitas, dan informasi lingkungan secara cepat. Gunakan peta interaktif untuk eksplorasi wilayah.</p>
+
+        <div style="display:flex;gap:10px; margin-top:14px;">
+          <button class="btn" onclick="openPanel('peta')">Buka Peta</button>
+          <button class="btn" style="background:transparent;color:var(--accent);border:1.6px solid rgba(106,168,255,0.22)" onclick="openModal()">Tanya Lokasi</button>
+        </div>
+
+        <div style="margin-top:18px;color:#2d526b;font-weight:600;">
+          <small>Tips: Klik peta untuk menambahkan marker. Gunakan kotak pencarian untuk menemukan alamat.</small>
+        </div>
+      </div>
+
+      <div class="globe-wrap">
+        <div class="globe-card" aria-hidden="true">
+          <!-- Inline SVG globe (simple lines) -->
+          <svg class="globe" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Globe animation">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="1">
+                <stop offset="0" stop-color="#76b8ff"/>
+                <stop offset="1" stop-color="#a8d8ff"/>
+              </linearGradient>
+            </defs>
+
+            <circle cx="100" cy="100" r="78" fill="url(#g1)"></circle>
+
+            <!-- meridian lines -->
+            <g stroke="#dff6ff" stroke-width="2" fill="none" opacity="0.95">
+              <path d="M100 22 C130 40 130 160 100 178" stroke-linecap="round" />
+              <path d="M100 22 C70 40 70 160 100 178" stroke-linecap="round" />
+            </g>
+
+            <!-- latitude arcs -->
+            <g stroke="#e6f8ff" stroke-width="2" fill="none" opacity="0.9">
+              <path d="M36 90 C60 70 140 70 164 90" stroke-linecap="round" />
+              <path d="M30 110 C60 115 140 115 170 110" stroke-linecap="round" />
+              <path d="M46 72 C74 60 126 60 154 72" stroke-linecap="round" />
+            </g>
+
+            <!-- subtle shine -->
+            <ellipse cx="70" cy="70" rx="28" ry="16" fill="rgba(255,255,255,0.25)" transform="rotate(-25 70 70)"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARDS -->
+    <section class="content" aria-label="Layanan & Informasi">
+      <div class="card" onclick="openPanel('peta')">
+        <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" alt="Layanan">
+        <div>
+          <h2>Layanan</h2>
+          <p>Gunakan data spasial desa untuk layanan publik dan perencanaan.</p>
+        </div>
+      </div>
+
+      <div class="card" onclick="openPanel('kolaborasi')">
+        <img src="https://cdn-icons-png.flaticon.com/512/2910/2910762.png" alt="Kolaborasi">
+        <div>
+          <h2>Kolaborasi</h2>
+          <p>Bergabung dengan instansi dan warga untuk membangun data bersama.</p>
+        </div>
+      </div>
+
+      <div class="card" onclick="openPanel('informasi')">
+        <img src="https://cdn-icons-png.flaticon.com/512/2913/2913460.png" alt="Informasi">
+        <div>
+          <h2>Informasi</h2>
+          <p>Berita lingkungan, panduan GIS, dan data terbuka.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANELS: PETA -->
+    <section id="peta" class="panel">
+      <h3 style="margin-top:6px;color:#013049">Peta Interaktif</h3>
+      <p style="margin-top:6px;color:#2f5368">Pusat peta berisi lokasi, marker, dan pencarian (Nominatim).</p>
+
+      <div class="map-wrap" style="margin-top:12px;">
+        <div class="search-box" role="search">
+          <input id="search" type="text" placeholder="Cari lokasi... (contoh: Alun Alun Banyumas)">
+          <button class="btn" onclick="searchLocation()">Cari</button>
+        </div> map desa
+
+        <div id="map"></div>
+      </div>
+    </section>
+
+    <!-- PANEL: Tanya Lokasi (ke modal) -->
+    <section id="lokasi" class="panel">
+      <h3>Tanya Lokasi</h3>
+      <p>Silakan ajukan pertanyaan lokasi melalui form. Tim akan merespons sesuai metode yang dipilih.</p>
+      <button class="btn" style="margin-top:12px" onclick="openModal()">Buka Tanya Lokasi</button>
+    </section>
+
+    <!-- PANEL: Kolaborasi / Informasi -->
+    <section id="kolaborasi" class="panel">
+      <h3>Kolaborasi</h3>
+      <ul>
+        <li>Integrasi data desa</li>
+        <li>Pengelolaan layanan publik</li>
+      </ul>
+    </section>
+
+    <section id="informasi" class="panel">
+      <h3>Informasi</h3>
+      <ul>
+        <li>Berita & Panduan GIS</li>
+        <li>Dataset terbuka</li>
+      </ul>
+    </section>
+
+    <section id="tentang" class="panel">
+      <h3>Tentang Portal Desa Badamita</h3>
+      <p>Portal Desa Badamita adalah platform informasi lingkungan yang menyediakan layanan peta, data spasial, kolaborasi instansi, serta informasi terbaru seputar lingkungan.</p>
+    </section>
+  </main>
+
+  <!-- Modal Tanya Lokasi -->
+  <div id="modalArah" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <span class="close-btn" onclick="closeModal()" aria-label="Close">&times;</span>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="width:58px;height:58px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;color:white;font-weight:800">BD</div>
+        <div>
+          <div id="modalTitle" style="font-size:20px;font-weight:800;color:#07335a">Tanya Lokasi</div>
+          <div style="font-size:13px;color:#4a6b7f">Masukkan kontak agar kami dapat menghubungi Anda</div>
+        </div>
+      </div>
+
+      <form id="formArah">
+        <label for="emailArah">Email Anda *</label>
+        <input type="email" id="emailArah" placeholder="nama@gmail.com" required>
+
+        <label for="waArah">Nomor WhatsApp (opsional)</label>
+        <input type="text" id="waArah" placeholder="628xxxx...">
+
+        <label for="pesanArah">Catatan / Pertanyaan Anda</label>
+        <textarea id="pesanArah" placeholder="Contoh: saya ingin mengetahui lokasi RT 03..." rows="5"></textarea>
+
+        <label for="metodeArah">Pilih Metode Kirim</label>
+        <select id="metodeArah">
+          <option value="email">Kirim via Email</option>
+          <option value="wa">Kirim via WhatsApp</option>
+        </select>
+
+        <button type="submit" class="btn-submit" id="btnKirimLokasi">Kirim Permintaan</button>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 Portal Desa Badamita — dibuat dengan ♡
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // Simple panel navigation and show/hide
+    function hideAllPanels() {
+      document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
+    }
+    function openPanel(id) {
+      hideAllPanels();
+      const el = document.getElementById(id);
+      if(el) el.style.display = 'block';
+      // scroll into view smoothly
+      setTimeout(()=> el.scrollIntoView({behavior:'smooth', block:'start'}), 60);
+    }
+
+    // Nav anchors behavior
+    document.querySelectorAll(".nav-menu a").forEach(a=>{
+      a.addEventListener("click", function(e){
+        const href = this.getAttribute("href");
+        if(href && href.startsWith("#")) {
+          e.preventDefault();
+          const id = href.slice(1);
+          if(id === 'beranda'){
+            hideAllPanels();
+            window.scrollTo({top:0, behavior:'smooth'});
+          } else {
+            openPanel(id);
+          }
+        }
+      });
+    });
+
+    // Modal functions
+    function openModal(){
+      const md = document.getElementById('modalArah');
+      md.classList.add('show');
+      md.setAttribute('aria-hidden','false');
+    }
+          md.classList.add('show');
+    
+    function closeModal(){
+      const md = document.getElementById('modalArah');
+      md.classList.remove('show');
+    }
+
+    // Close modal on outside click
+    document.getElementById('modalArah').addEventListener('click', function(e){
+      if(e.target === this) closeModal();
+    });
+
+    // -------------------------------------------------------
+    //  INIT MAP LEAFLET
+    // -------------------------------------------------------
+
+    const map = L.map('map').setView([-7.427, 109.246], 14);
+
+    // Basemap
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(map);
+
+    // Marker click to add point
+    let clickMarker;
+    map.on('click', function(e){
+      if(clickMarker) map.removeLayer(clickMarker);
+      clickMarker = L.marker(e.latlng).addTo(map);
+    });
+
+    // -------------------------------------------------------
+    //  SEARCH LOCATION (Nominatim)
+    // -------------------------------------------------------
+    async function searchLocation(){
+      const q = document.getElementById('search').value.trim();
+      if(!q){ alert('Masukkan kata pencarian'); return; }
+
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if(data.length === 0){
+        alert('Lokasi tidak ditemukan.');
+        return;
+      }
+
+      const lat = parseFloat(data[0].lat);
+      const lon = parseFloat(data[0].lon);
+
+      map.setView([lat, lon], 17);
+
+      L.marker([lat, lon]).addTo(map)
+        .bindPopup(`<b>${data[0].display_name}</b>`).openPopup();
+    }
+
+    // -------------------------------------------------------
+    //  FORM KIRIM
+    // -------------------------------------------------------
+    document.getElementById('formArah').addEventListener('submit', function(e){
+      e.preventDefault();
+
+      const metode = document.getElementById('metodeArah').value;
+      const email = document.getElementById('emailArah').value;
+      const wa = document.getElementById('waArah').value;
+      const pesan = document.getElementById('pesanArah').value;
+
+      if(metode === 'email'){
+        alert('Permintaan akan dikirim via Email: ' + email);
+      } else {
+        window.open(`https://wa.me/${wa}?text=${encodeURIComponent(pesan)}`);
+      }
+
+      closeModal();
+    });
+  </script>
+</body>
+</html>
