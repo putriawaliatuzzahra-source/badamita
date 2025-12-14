@@ -1,147 +1,206 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Portal Desa Badamita — UPDATED</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Portal Desa Badamita — Peta Interaktif</title>
 
   <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;800&display=swap" rel="stylesheet">
 
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
   <style>
-    /* ================= ROOT ================= */
     :root{
-      --bg:#f6fbff;
-      --card:#fff;
-      --accent:#1976d2;
-      --accent-soft:#6aa8ff;
-      --muted:#6b7c8a;
-      --radius:14px;
-      --shadow-lg:0 14px 40px rgba(26,94,176,.08);
-      --shadow-sm:0 6px 18px rgba(15,55,95,.06);
+      --bg: #f6fbff;
+      --card: #ffffff;
+      --accent: #1976d2;
+      --accent-soft: #6aa8ff;
+      --muted: #6b7c8a;
+      --radius: 14px;
+      --shadow-lg: 0 14px 40px rgba(26,94,176,0.08);
+      --shadow-sm: 0 6px 18px rgba(15,55,95,0.06);
     }
+
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       margin:0;
-      font-family:Poppins,system-ui;
-      background:linear-gradient(180deg,var(--bg),#eef9ff);
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg, var(--bg) 0%, #eef9ff 100%);
       color:#213244;
-    }
-    .container{max-width:1100px;margin:auto;padding:0 20px}
-
-    /* ================= NAV ================= */
-    header{
-      position:sticky;top:0;z-index:999;
-      background:rgba(255,255,255,.85);
-      backdrop-filter:blur(6px);
-      border-bottom:1px solid rgba(25,118,210,.06);
-    }
-    .navbar{display:flex;align-items:center;gap:18px;padding:12px 0}
-    .logo{display:flex;gap:12px;font-weight:800;color:var(--accent)}
-    .logo .dot{
-      width:42px;height:42px;border-radius:12px;
-      background:linear-gradient(135deg,var(--accent),var(--accent-soft));
-      display:flex;align-items:center;justify-content:center;
-      color:#fff;font-weight:900
-    }
-    .nav-menu{margin-left:auto;display:flex;gap:8px;list-style:none;padding:0}
-    .nav-menu a{
-      text-decoration:none;color:var(--muted);
-      padding:8px 12px;border-radius:10px;font-weight:600
-    }
-    .nav-menu a:hover{background:rgba(25,118,210,.08);color:var(--accent)}
-
-    /* ================= HERO ================= */
-    .hero{display:grid;grid-template-columns:1fr 360px;gap:24px;margin:28px 0}
-    .hero-card{
-      background:#fff;border-radius:14px;padding:28px;
-      box-shadow:var(--shadow-lg)
-    }
-    .hero h1{margin:0 0 10px;color:#07335a}
-    .lead{color:#405b6a}
-
-    .btn{
-      padding:10px 14px;border-radius:12px;
-      border:none;cursor:pointer;font-weight:700
-    }
-    .btn.primary{
-      background:var(--accent);color:#fff
-    }
-    .btn.secondary{
-      background:#fff;border:1px solid rgba(25,118,210,.2);
-      color:var(--accent)
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.45;
     }
 
+    .container { max-width:1100px; margin:0 auto; padding: 0 20px; }
+
+    /* Globe Animasi */
     .globe-card{
-      width:220px;height:220px;border-radius:20px;
-      background:#eaf6ff;
-      display:flex;align-items:center;justify-content:center
+      width:240px;
+      height:240px;
+      border-radius:20px;
+      background: linear-gradient(180deg,#eaf6ff,#dff3ff);
+      display:flex;align-items:center;justify-content:center;
+      box-shadow: 0 20px 40px rgba(20,80,140,0.06);
+      border:1px solid rgba(110,180,240,0.12);
+      transform-style:preserve-3d;
+      animation:float 5s ease-in-out infinite;
     }
-    .globe{width:150px;height:150px}
-
-    /* ================= CARDS ================= */
-    .content{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-      gap:18px
+    .globe{
+      width:160px;height:160px;
+      animation: spin 12s linear infinite;
     }
-    .card{
-      background:#fff;border-radius:12px;padding:18px;
-      display:flex;gap:12px;cursor:pointer;
-      box-shadow:var(--shadow-sm)
-    }
-    .card img{width:54px;height:54px;border-radius:12px}
-
-    /* ================= PANEL ================= */
-    .panel{
-      display:none;margin:30px 0;
-      background:#fff;border-radius:14px;padding:18px;
-      box-shadow:var(--shadow-sm)
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes float{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-18px)}
     }
 
-    /* ================= MAP ================= */
-    .map-wrap{position:relative}
-    #map{height:520px;border-radius:12px}
+    /* NAVBAR */
+    header{
+      position:sticky; top:0; z-index:9999;
+      backdrop-filter: blur(6px);
+      background: linear-gradient(90deg, rgba(255,255,255,0.85), rgba(255,255,255,0.78));
+      border-bottom: 1px solid rgba(25,118,210,0.06);
+    }
+    .navbar{
+      max-width:1100px; margin:0 auto; display:flex; align-items:center; gap:18px; padding:12px 20px;
+    }
+    .logo{ display:flex; align-items:center; gap:12px; font-weight:800; color:var(--accent); font-size:18px; }
+    .logo .dot{ width:44px;height:44px;border-radius:12px; background: linear-gradient(135deg,var(--accent),var(--accent-soft)); display:flex;align-items:center;justify-content:center; color:white;font-weight:900;font-size:16px; }
+    .nav-menu{ margin-left:auto; display:flex; gap:10px; list-style:none; padding:0; align-items:center; }
+    .nav-menu a{ text-decoration:none; color:var(--muted); font-weight:600; padding:8px 12px; border-radius:10px; transition: all .18s ease; }
+    .nav-menu a:hover{ background:rgba(25,118,210,0.08); color:var(--accent); transform:translateY(-3px) }
 
-    .search-box{
-      position:absolute;top:16px;left:16px;z-index:1000;
-      background:#fff;padding:10px;border-radius:12px;
-      display:flex;gap:8px
+    /* HERO */
+    .hero{ margin:28px auto; display:grid; grid-template-columns: 1fr 240px; gap:24px; align-items:center; padding:28px 20px; position:relative; }
+    .hero-card{ background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,253,255,0.98)); border-radius: var(--radius); padding:28px; box-shadow: var(--shadow-lg); border:1px solid rgba(25,118,210,0.08); position:relative; z-index:1; }
+    .hero h1{ margin:0 0 8px; font-size:28px; color:#07335a; }
+    .lead { margin:0 0 18px; color:#405b6a; font-size:15px; }
+
+    .hero-actions{ display:flex; gap:12px; align-items:center; }
+    .btn { padding:10px 14px; border-radius:12px; background:var(--accent); color:white; border:none; cursor:pointer; font-weight:700; box-shadow: 0 8px 20px rgba(25,118,210,0.08); transition: transform .14s ease; }
+    .btn.secondary { background:transparent; color:var(--accent); border:1.4px solid rgba(25,118,210,0.15); font-weight:700; }
+    .btn:hover{ transform: translateY(-3px) }
+
+    /* CARDS VERTIKAL */
+    .content{ margin: 28px auto 30px; display:grid; grid-template-columns: 1fr; gap:18px; }
+    .card{ background:var(--card); border-radius:12px; padding:18px; box-shadow: var(--shadow-sm); display:flex; gap:12px; align-items:flex-start; cursor:pointer; transition: transform .18s ease, box-shadow .18s ease; }
+    .card img{ width:56px;height:56px;object-fit:cover;border-radius:12px }
+    .card h2{ margin:0;font-size:16px;color:#0b3b5f }
+    .card p{ margin:6px 0 0;color:#4b656f;font-size:13px }
+    .card:hover{ transform: translateY(-8px); box-shadow: 0 18px 36px rgba(20,80,140,0.06) }
+
+    /* PANEL */
+    .panel{ max-width:1100px; margin: 20px auto; background: rgba(255,255,255,0.98); border-radius:14px; padding:18px; box-shadow: var(--shadow-sm); border:1px solid rgba(110,160,220,0.06); display:none; }
+    .panel h3{ margin:0; font-size:18px; color:#07283a }
+    .muted { color: var(--muted); font-size:13px }
+
+    /* Tanya Lokasi Card Floating */
+    .tanya-card {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 320px;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 12px 28px rgba(20,80,140,0.12);
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      animation: fadeIn 0.25s ease forwards;
+      z-index: 10;
+      font-size: 14px;
     }
 
-    #panelHasil{
-      position:absolute;top:72px;left:16px;
-      background:#fff;width:320px;
-      border-radius:12px;display:none;
-      box-shadow:0 8px 24px rgba(0,0,0,.15);
-      z-index:1001
+    .tanya-card h3 {
+      margin: 0 0 10px;
+      color: #07283a;
+      font-size: 16px;
+      font-weight: 700;
     }
-    .hasil-item{padding:10px;cursor:pointer}
-    .hasil-item:hover{background:#eef6ff}
 
-    footer{text-align:center;margin:40px 0;color:#6b7c8a}
+    .tanya-card label {
+      font-weight: 500;
+      margin-top: 6px;
+    }
 
+    .tanya-card input, 
+    .tanya-card textarea, 
+    .tanya-card select {
+      width: 100%;
+      padding: 8px 10px;
+      margin-top: 4px;
+      border-radius: 10px;
+      border: 1px solid rgba(25,118,210,0.2);
+      outline: none;
+      font-size: 13px;
+      transition: 0.2s;
+    }
+
+    .tanya-card input:focus,
+    .tanya-card textarea:focus,
+    .tanya-card select:focus{
+      border-color: var(--accent);
+      box-shadow: 0 0 6px rgba(25,118,210,0.2);
+    }
+
+    .btn-send {
+      margin-top: 12px;
+      width: 100%;
+      padding: 10px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-send:hover {
+      background: var(--accent-soft);
+      transform: translateY(-2px);
+    }
+
+    /* Animasi fade in */
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(-12px);}
+      to {opacity:1; transform: translateY(0);}
+    }
+
+    /* Responsive mobile */
     @media(max-width:900px){
-      .hero{grid-template-columns:1fr}
-      #map{height:420px}
+      .hero{grid-template-columns:1fr; gap:16px; padding:18px 20px;}
+      .globe-card{width:180px;height:180px}
+      .globe{width:120px;height:120px}
+      .tanya-card {
+        position: fixed;
+        top: 50px;
+        right: 50%;
+        transform: translateX(50%);
+        width: 90%;
+      }
     }
   </style>
 </head>
-
 <body>
 
+<!-- NAV -->
 <header>
   <nav class="navbar container">
     <div class="logo">
-      <div class="dot">BD</div>
-      <div>Badamita Maps</div>
+      <div class="dot">MB</div>
+      <div>
+        <div style="line-height:1; font-size:14px; color:var(--muted)">Portal</div>
+        <div style="line-height:1; font-weight:800">Maps Badamita</div>
+      </div>
     </div>
+
     <ul class="nav-menu">
       <li><a href="#beranda">Beranda</a></li>
       <li><a href="maps/index.html" target="_blank">Peta Badamita</a></li>
+      <li><a href="#petakecamatan">Peta Kecamatan</a></li>
       <li><a href="#tentang">Tentang</a></li>
     </ul>
   </nav>
@@ -153,97 +212,189 @@
 <section id="beranda" class="hero">
   <div class="hero-card">
     <h1>Peta Interaktif Desa Badamita</h1>
-    <p class="lead">Eksplorasi wilayah desa secara interaktif berbasis GIS.</p>
-    <button class="btn primary" onclick="openPanel('peta')">Buka Peta</button>
+    <p class="lead">Tanya lokasi, fasilitas, dan informasi lingkungan secara cepat. Gunakan peta interaktif untuk eksplorasi wilayah.</p>
+    <div class="hero-actions">
+      <button class="btn secondary" onclick="toggleTanyaCard()">Tanya Lokasi</button>
+    </div>
+    <div style="margin-top:18px;color:#2d526b;font-weight:600;">
+      <small>Tips: Klik tombol "Tanya Lokasi" untuk bertanya.</small>
+    </div>
   </div>
 
-  <div class="globe-card">
-    <svg class="globe" viewBox="0 0 200 200">
-      <circle cx="100" cy="100" r="78" fill="#76b8ff"/>
-    </svg>
+  <div class="globe-wrap">
+    <div class="globe-card" aria-hidden="true">
+      <svg class="globe" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Globe animation">
+        <defs>
+          <linearGradient id="g1" x1="0" x2="1">
+            <stop offset="0" stop-color="#76b8ff"/>
+            <stop offset="1" stop-color="#a8d8ff"/>
+          </linearGradient>
+        </defs>
+        <circle cx="100" cy="100" r="78" fill="url(#g1)"></circle>
+        <g stroke="#dff6ff" stroke-width="2" fill="none" opacity="0.95">
+          <path d="M100 22 C130 40 130 160 100 178" stroke-linecap="round" />
+          <path d="M100 22 C70 40 70 160 100 178" stroke-linecap="round" />
+        </g>
+        <g stroke="#e6f8ff" stroke-width="2" fill="none" opacity="0.9">
+          <path d="M36 90 C60 70 140 70 164 90" stroke-linecap="round" />
+          <path d="M30 110 C60 115 140 115 170 110" stroke-linecap="round" />
+          <path d="M46 72 C74 60 126 60 154 72" stroke-linecap="round" />
+        </g>
+        <ellipse cx="70" cy="70" rx="28" ry="16" fill="rgba(255,255,255,0.25)" transform="rotate(-25 70 70)"/>
+      </svg>
+    </div>
   </div>
+
+  <!-- Tanya Lokasi Floating Card -->
+  <div class="tanya-card" id="tanyaCard">
+    <h3>Tanya Lokasi</h3>
+    <form id="formTanya">
+      <label for="emailTanya">Email *</label>
+      <input type="email" id="emailTanya" placeholder="nama@gmail.com" required>
+      
+      <label for="waTanya">WhatsApp (opsional)</label>
+      <input type="text" id="waTanya" placeholder="628xxxx...">
+
+      <label for="pesanTanya">Pertanyaan</label>
+      <textarea id="pesanTanya" placeholder="Contoh: saya ingin mengetahui lokasi RT 03..." rows="3"></textarea>
+
+      <label for="metodeTanya">Metode Kirim</label>
+      <select id="metodeTanya">
+        <option value="email">Email</option>
+        <option value="wa">WhatsApp</option>
+      </select>
+
+      <button type="submit" class="btn-send">Kirim</button>
+    </form>
+  </div>
+
 </section>
 
 <!-- CARDS -->
-<section class="content">
-  <div class="card" onclick="openPanel('peta')">
-    <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png">
+<section class="content" aria-label="Informasi GIS Desa">
+  <div class="card" onclick="openPanel('profil')">
+    <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Profil Wilayah">
     <div>
-      <h3>Peta Desa</h3>
-      <p>Lihat batas wilayah dan fasilitas</p>
+      <h2>Profil Wilayah</h2>
+      <p>Informasi letak geografis, batas wilayah, dan gambaran umum Desa Badamita.</p>
+    </div>
+  </div>
+
+  <div class="card" onclick="openPanel('penduduk')">
+    <img src="https://cdn-icons-png.flaticon.com/512/921/921347.png" alt="Data Penduduk">
+    <div>
+      <h2>Data Kependudukan</h2>
+      <p>Statistik jumlah penduduk, kepala keluarga, dan komposisi warga desa.</p>
+    </div>
+  </div>
+
+  <div class="card" onclick="openPanel('potensi')">
+    <img src="https://cdn-icons-png.flaticon.com/512/3063/3063822.png" alt="Potensi Desa">
+    <div>
+      <h2>Potensi & Fasilitas</h2>
+      <p>Fasilitas umum, sarana desa, dan potensi wilayah yang dapat dikembangkan.</p>
+    </div>
+  </div>
+
+  <!-- CARD TENTANG DESA -->
+  <div class="card" onclick="openPanel('tentang')">
+    <img src="https://cdn-icons-png.flaticon.com/512/1946/1946488.png" alt="Tentang Desa">
+    <div>
+      <h2>Tentang Desa</h2>
+      <p>Informasi visi, misi, dan profil Desa Badamita secara lengkap.</p>
     </div>
   </div>
 </section>
 
-<!-- PANEL PETA -->
-<section id="peta" class="panel">
-  <h3>Peta Interaktif</h3>
+<!-- PANEL -->
+<section id="profil" class="panel">
+  <h3>Profil Wilayah Desa Badamita</h3>
+  <p class="muted">Desa Badamita terletak di Kecamatan Rakit, Kabupaten Banjarnegara. Luas wilayah 360,000 Ha dengan 5 dusun, didominasi area pertanian dan permukiman.</p>
+</section>
 
-  <div class="map-wrap">
-    <div class="search-box">
-      <input id="search" placeholder="Cari lokasi...">
-      <button onclick="liveSearch()">Cari</button>
-    </div>
-    <div id="panelHasil"></div>
-    <div id="map"></div>
-  </div>
+<section id="penduduk" class="panel">
+  <h3>Data Kependudukan</h3>
+  <ul style="margin-top:8px">
+    <li>👨‍👩‍👧 Jumlah Penduduk: 5301 Penduduk</li>
+    <li>🏠 Kepala Keluarga: 1616  KK</li>
+    <li>♂️ Laki-laki: 2705 Jiwa</li>
+    <li>♀️ Perempuan: 2596 Jiwa</li>
+  </ul>
+  <p class="muted">Sumber: Data Monografi Desa Badamita</p>
+</section>
+
+<section id="potensi" class="panel">
+  <h3>Potensi & Fasilitas Desa</h3>
+  <ul style="margin-top:8px">
+    <li>🏫 Fasilitas Pendidikan seperti sekolah, tpq, bimbel.</li>
+    <li>🏥 Fasilitas Kesehatan seperti mantri.</li>
+    <li>🌾 Potensi Pertanian seperti tani padi</li>
+  </ul>
 </section>
 
 <section id="tentang" class="panel">
-  <h3>Tentang</h3>
-  <p>Portal Desa Badamita berbasis Web GIS.</p>
+  <h3>Tentang Desa Badamita</h3>
+  <p class="muted">Desa Badamita memiliki visi dan misi untuk meningkatkan kualitas hidup warga melalui pengembangan fasilitas pendidikan, kesehatan, dan pertanian.</p>
+  <ul style="margin-top:8px">
+    <li><strong>Visi:</strong> Terwujudnya Desa Badamita yang maju, mandiri, dan sejahtera.</li>
+    <li><strong>Misi:</strong> Meningkatkan pendidikan, kesehatan, dan potensi ekonomi desa secara berkelanjutan.</li>
+  </ul>
 </section>
 
-</main>
-
-<footer>© 2025 Portal Desa Badamita</footer>
-
-<!-- ================= SCRIPTS ================= -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<footer class="container" style="margin-top:24px">© 2025 Portal Desa Badamita</footer>
 
 <script>
-let map;
-
-/* PANEL */
+// PANEL
+function hideAllPanels() {
+  document.querySelectorAll('.panel').forEach(p => { p.style.display = 'none'; });
+}
 function openPanel(id){
-  document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
-  const el=document.getElementById(id);
-  if(el){
-    el.style.display='block';
-    setTimeout(()=>{ if(map) map.invalidateSize(); },200);
+  hideAllPanels();
+  const el = document.getElementById(id);
+  if(el){ el.style.display='block'; el.scrollIntoView({behavior:'smooth'}); }
+}
+
+// NAVBAR klik
+document.querySelectorAll(".nav-menu a").forEach(a=>{
+  a.addEventListener("click", function(e){
+    const href = this.getAttribute("href");
+    if(href && href.startsWith("#")){
+      e.preventDefault();
+      const targetId = href.substring(1);
+      openPanel(targetId); // pakai fungsi openPanel yang sudah ada
+    }
+  })
+});
+
+// Tanya Lokasi toggle
+function toggleTanyaCard() {
+  const card = document.getElementById("tanyaCard");
+  card.style.display = (card.style.display === "none" || card.style.display === "") ? "flex" : "none";
+}
+document.querySelector(".hero-actions .btn.secondary").onclick = toggleTanyaCard;
+
+// Form Tanya Lokasi
+document.getElementById("formTanya").addEventListener("submit", function(e){
+  e.preventDefault();
+  const email = document.getElementById("emailTanya").value.trim();
+  const wa = document.getElementById("waTanya").value.trim();
+  const metode = document.getElementById("metodeTanya").value;
+  const pesan = document.getElementById("pesanTanya").value.trim() || "Saya ingin bertanya tentang lokasi.";
+
+  if(email===""){ alert("Email wajib diisi!"); return; }
+
+  if(metode==="email"){
+    window.location.href = `mailto:${email}?subject=Tanya Lokasi&body=${encodeURIComponent(pesan)}`;
+  } else {
+    const waNum = wa.replace(/[^0-9]/g,"");
+    if(waNum.length<8){ alert("Nomor WA tidak valid"); return; }
+    window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(pesan)}`, "_blank");
   }
-}
 
-/* MAP INIT */
-map=L.map('map').setView([-7.427,109.246],12);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-  maxZoom:19
-}).addTo(map);
-
-/* SEARCH */
-async function liveSearch(){
-  const q=document.getElementById('search').value.trim();
-  if(q.length<2) return;
-
-  const res=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}`);
-  const data=await res.json();
-
-  const panel=document.getElementById('panelHasil');
-  panel.innerHTML='';
-  panel.style.display='block';
-
-  data.slice(0,5).forEach(i=>{
-    const d=document.createElement('div');
-    d.className='hasil-item';
-    d.textContent=i.display_name;
-    d.onclick=()=>{
-      map.setView([i.lat,i.lon],17);
-      L.marker([i.lat,i.lon]).addTo(map);
-      panel.style.display='none';
-    };
-    panel.appendChild(d);
-  });
-}
+  alert("Permintaan berhasil dikirim!");
+  this.reset();
+  document.getElementById("tanyaCard").style.display = "none";
+});
 </script>
 
 </body>
