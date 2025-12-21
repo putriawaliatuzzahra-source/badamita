@@ -1,0 +1,1 @@
+var json_Alfamart_35 = {"type":"FeatureCollection","name":"Alfamart_35","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"features":[{"type":"Feature","properties":{"id":"1","Alfamart":"Alfamart Badamita"},"geometry":{"type":"Point","coordinates":[109.565048225028079,-7.395664603855241]}}]}
