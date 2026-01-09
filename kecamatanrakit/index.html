@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1d3557;
+            --secondary: #457b9d;
+            --accent: #e63946;
+            --bg-light: #f8fafc;
+            --white: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            overflow: hidden;
+            background-color: var(--bg-light);
+        }
+
+        #app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Sidebar Styling */
+        #sidebar {
+            width: 400px;
+            height: 100%;
+            background: var(--white);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 30px 25px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-header::after {
+            content: '';
+            position: absolute;
+            top: -20%;
+            right: -10%;
+            width: 150px;
+            height: 150px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .sidebar-header h3 { 
+            margin: 0; 
+            font-size: 1.4rem; 
+            font-weight: 800; 
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .sidebar-header p { 
+            margin: 8px 0 0 0; 
+            font-size: 0.9rem; 
+            opacity: 0.85; 
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Search Area */
+        .search-container {
+            padding: 20px;
+            background: var(--white);
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box i { 
+            position: absolute; 
+            left: 15px; 
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 14px 14px 14px 45px;
+            border: 2px solid #f1f5f9;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #f8fafc;
+        }
+
+        .search-container input:focus { 
+            border-color: var(--secondary); 
+            background: white;
+            box-shadow: 0 0 0 4px rgba(69, 123, 157, 0.15);
+        }
+
+        /* Catalog List */
+        #catalog-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+
+        .catalog-item {
+            background: var(--white);
+            padding: 18px;
+            margin-bottom: 15px;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .catalog-item:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 12px 20px -5px rgba(0,0,0,0.08); 
+            border-color: var(--secondary);
+        }
+
+        .catalog-item h4 { 
+            margin: 0; 
+            font-size: 1rem; 
+            color: var(--text-main); 
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .catalog-item .badge {
+            align-self: flex-start;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f1f5f9;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Map Styling */
+        #map { flex: 1; height: 100%; background: #e2e8f0; }
+
+        /* Custom Label Design */
+        .custom-label {
+            background: rgba(255, 255, 255, 0.98);
+            border: none;
+            border-radius: 6px;
+            padding: 3px 7px;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--secondary);
+            white-space: nowrap;
+        }
+
+        .desa-label-permanent {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 13px;
+            text-shadow: 0 0 8px white, 0 0 8px white;
+            text-transform: uppercase;
+            pointer-events: none;
+            letter-spacing: 0.8px;
+        }
+
+        /* Leaflet Controls Customization */
+        .leaflet-control-layers {
+            border-radius: 12px !important;
+            border: none !important;
+            box-shadow: var(--shadow) !important;
+            padding: 10px !important;
+        }
+
+        .leaflet-bar a {
+            background-color: white !important;
+            color: var(--primary) !important;
+            border: none !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+        }
+
+        /* Compass Styling */
+        .compass-control {
+            background: white;
+            padding: 8px;
+            border-radius: 50%;
+            box-shadow: var(--shadow);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid var(--secondary);
+        }
+
+        .compass-control:hover {
+            transform: scale(1.1);
+            background: var(--bg-light);
+        }
+
+        /* Scrollbar Premium */
+        #catalog-list::-webkit-scrollbar { width: 6px; }
+        #catalog-list::-webkit-scrollbar-track { background: transparent; }
+        #catalog-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        #catalog-list::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        @media (max-width: 768px) {
+            #sidebar { 
+                position: fixed; 
+                bottom: 0; 
+                width: 100%; 
+                height: 40%; 
+                z-index: 2000; 
+                border-top-left-radius: 25px;
+                border-top-right-radius: 25px;
+            }
+        }
+    </style>
+    <title>SIG Kecamatan Rakit - Premium Experience</title>
+</head>
+<body>
+
+<div id="app-container">
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <h3>Peta Kecamatan Rakit</h3>
+            <p><i class="fa-solid fa-location-crosshairs"></i> Sistem Informasi Geografis</p>
+        </div>
+        <div class="search-container">
+            <div class="search-box">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Cari nama tempat..." onkeyup="filterCatalog()">
+            </div>
+        </div>
+        <div id="catalog-list"></div>
+    </div>
+    <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Memuat data external -->
+<script src="data/Kecamatan_1.js"></script>
+<script src="data/Pemerintahan_24.js"></script>
+<script src="data/Kesehatan_23.js"></script>
+<script src="data/Pendidikan_19.js"></script>
+<script src="data/SaranaIbadah_22.js"></script>
+<script src="data/UMKM_18.js"></script>
+<script src="data/KantorPolisiRakit_20.js"></script>
+<script src="data/KantorPos_21.js"></script>
+
+<script>
+    // 1. Basemaps
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+    });
+
+    var hybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+        maxZoom: 20, subdomains:['mt0','mt1','mt2','mt3'], attribution: '&copy; Google'
+    });
+
+    // Menambahkan Google Terrain
+    var terrain = L.tileLayer('https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
+        maxZoom: 20, subdomains:['mt0','mt1','mt2','mt3'], attribution: '&copy; Google Terrain'
+    });
+
+    // 2. Map Init
+    var map = L.map('map', {
+        center: [-7.4218, 109.5472],
+        zoom: 13,
+        zoomControl: false,
+        layers: [hybrid] // Layer default saat load
+    });
+
+    // Konfigurasi Layer Control
+    var baseMaps = {
+        "Satelit (Hybrid)": hybrid,
+        "Peta Jalan (OSM)": osm,
+        "Terrain": terrain
+    };
+
+    // Menambahkan Control Layers ke Map
+    L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
+
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    // Custom Compass Control
+    var CompassControl = L.Control.extend({
+        options: { position: 'topleft' },
+        onAdd: function (map) {
+            var container = L.DomUtil.create('div', 'compass-control');
+            container.innerHTML = '<i class="fa-solid fa-compass"></i>';
+            container.title = "Reset View";
+            container.onclick = function() {
+                map.flyTo([-7.4218, 109.5472], 13);
+            };
+            return container;
+        }
+    });
+    map.addControl(new CompassControl());
+
+    // 3. Layers Groups
+    var layerKecamatan = L.geoJson(null, {
+        style: function(feature) {
+            return { color: '#1d3557', weight: 2.2, fillColor: '#457b9d', fillOpacity: 0.12 };
+        },
+        onEachFeature: function(feature, layer) {
+            layer.on('mouseover', function(e) {
+                e.target.setStyle({ weight: 4, color: '#e63946', fillOpacity: 0.35 });
+                e.target.bringToFront();
+            });
+            layer.on('mouseout', function(e) {
+                if (map.getZoom() < 13) {
+                    e.target.setStyle({ color: '#e63946', weight: 3.5, fillOpacity: 0.25 });
+                } else {
+                    layerKecamatan.resetStyle(e.target);
+                }
+            });
+        }
+    }).addTo(map);
+
+    var layerPemerintahan = L.featureGroup();
+    var layerFasilitasLain = L.featureGroup();
+
+    // 4. Icons
+    const createIcon = (iconClass, color) => L.divIcon({
+        html: `<div style="background: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border: 2px solid ${color};">
+                <i class="${iconClass}" style="color: ${color}; font-size: 13px;"></i>
+              </div>`,
+        className: 'custom-div-icon',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+    });
+
+    const icons = {
+        pemerintahan: createIcon('fa-solid fa-building-columns', '#1d3557'),
+        keamanan: createIcon('fa-solid fa-shield-halved', '#1d3557'),
+        pos: createIcon('fa-solid fa-envelope', '#f4a261'),
+        kesehatan: createIcon('fa-solid fa-heart-pulse', '#e63946'),
+        pendidikan: createIcon('fa-solid fa-graduation-cap', '#457b9d'),
+        ibadah: createIcon('fa-solid fa-mosque', '#2a9d8f'),
+        umkm: createIcon('fa-solid fa-shop', '#f4a261')
+    };
+
+    // 5. Logic Zoom Visibility
+    function updateLayerVisibility() {
+        var zoom = map.getZoom();
+        
+        if (zoom < 13) {
+            layerKecamatan.eachLayer(l => l.unbindTooltip());
+            layerKecamatan.setStyle({ color: '#e63946', weight: 3.5, fillOpacity: 0.2 });
+            
+            if (map.hasLayer(layerPemerintahan)) map.removeLayer(layerPemerintahan);
+            if (map.hasLayer(layerFasilitasLain)) map.removeLayer(layerFasilitasLain);
+        } else {
+            layerKecamatan.eachLayer(l => {
+                var name = l.feature.properties.NAMOBJ || "Desa";
+                l.bindTooltip(name, { permanent: true, direction: 'center', className: 'desa-label-permanent' });
+            });
+            layerKecamatan.setStyle({ color: '#1d3557', weight: 2.2, fillOpacity: 0.12 });
+
+            if (zoom >= 13 && zoom < 15) {
+                if (!map.hasLayer(layerPemerintahan)) map.addLayer(layerPemerintahan);
+                if (map.hasLayer(layerFasilitasLain)) map.removeLayer(layerFasilitasLain);
+            } 
+            else if (zoom >= 15) {
+                if (!map.hasLayer(layerPemerintahan)) map.addLayer(layerPemerintahan);
+                if (!map.hasLayer(layerFasilitasLain)) map.addLayer(layerFasilitasLain);
+            }
+        }
+    }
+
+    map.on('zoomend', updateLayerVisibility);
+
+    function setupMarker(feature, layer, icon, type) {
+        var name = feature.properties.NAMOBJ || feature.properties.name || feature.properties.REMARK || "Lokasi";
+        var marker = L.marker(layer.getLatLng(), { icon: icon });
+        
+        marker.bindTooltip(name, {
+            permanent: true, direction: 'bottom', className: 'custom-label', offset: [0, 14]
+        });
+
+        marker.bindPopup(`<div style="font-family: Inter; padding: 5px;">
+            <strong style="color:var(--primary); font-size:13.5px;">${name}</strong><br>
+            <span style="color:var(--text-muted); font-size:11px;">Kategori: ${type}</span>
+        </div>`);
+        return marker;
+    }
+
+    var catalogData = [];
+
+    function processData() {
+        if (typeof json_Kecamatan_1 !== 'undefined') layerKecamatan.addData(json_Kecamatan_1);
+
+        if (typeof json_Pemerintahan_24 !== 'undefined') {
+            L.geoJson(json_Pemerintahan_24, {
+                onEachFeature: function(f, l) {
+                    var m = setupMarker(f, l, icons.pemerintahan, "Pemerintahan");
+                    m.addTo(layerPemerintahan);
+                    addToCatalogArray(f, "Pemerintahan", "fa-building-columns");
+                }
+            });
+        }
+
+        if (typeof json_KantorPos_21 !== 'undefined') {
+            L.geoJson(json_KantorPos_21, {
+                onEachFeature: function(f, l) {
+                    var m = setupMarker(f, l, icons.pos, "Layanan Pos");
+                    m.addTo(layerFasilitasLain);
+                    addToCatalogArray(f, "Layanan Pos", "fa-envelope");
+                }
+            });
+        }
+
+        if (typeof json_KantorPolisiRakit_20 !== 'undefined') {
+            L.geoJson(json_KantorPolisiRakit_20, {
+                onEachFeature: function(f, l) {
+                    var m = setupMarker(f, l, icons.keamanan, "Keamanan");
+                    m.addTo(layerFasilitasLain);
+                    addToCatalogArray(f, "Keamanan", "fa-shield-halved");
+                }
+            });
+        }
+
+        const facilities = [
+            { data: typeof json_Kesehatan_23 !== 'undefined' ? json_Kesehatan_23 : null, type: 'Kesehatan', icon: icons.kesehatan, fa: 'fa-heart-pulse' },
+            { data: typeof json_Pendidikan_19 !== 'undefined' ? json_Pendidikan_19 : null, type: 'Pendidikan', icon: icons.pendidikan, fa: 'fa-graduation-cap' },
+            { data: typeof json_SaranaIbadah_22 !== 'undefined' ? json_SaranaIbadah_22 : null, type: 'Ibadah', icon: icons.ibadah, fa: 'fa-mosque' },
+            { data: typeof json_UMKM_18 !== 'undefined' ? json_UMKM_18 : null, type: 'UMKM', icon: icons.umkm, fa: 'fa-shop' }
+        ];
+
+        facilities.forEach(c => {
+            if(c.data) {
+                L.geoJson(c.data, {
+                    onEachFeature: function(f, l) {
+                        var m = setupMarker(f, l, c.icon, c.type);
+                        m.addTo(layerFasilitasLain);
+                        addToCatalogArray(f, c.type, c.fa);
+                    }
+                });
+            }
+        });
+
+        renderCatalog(catalogData);
+        updateLayerVisibility();
+    }
+
+    function addToCatalogArray(feature, type, icon) {
+        var name = feature.properties.NAMOBJ || feature.properties.name || feature.properties.REMARK || "Lokasi";
+        var coords = [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
+        catalogData.push({ name, type, icon, coords });
+    }
+
+    function renderCatalog(items) {
+        var list = document.getElementById('catalog-list');
+        list.innerHTML = '';
+        items.forEach(item => {
+            var card = document.createElement('div');
+            card.className = 'catalog-item';
+            card.innerHTML = `<h4>${item.name}</h4><div class="badge"><i class="fa-solid ${item.icon}"></i> ${item.type}</div>`;
+            card.onclick = () => map.setView(item.coords, 18);
+            list.appendChild(card);
+        });
+    }
+
+    function filterCatalog() {
+        var q = document.getElementById('searchInput').value.toLowerCase();
+        var f = catalogData.filter(i => i.name.toLowerCase().includes(q) || i.type.toLowerCase().includes(q));
+        renderCatalog(f);
+    }
+
+    window.onload = processData;
+</script>
+</body>
+</html>

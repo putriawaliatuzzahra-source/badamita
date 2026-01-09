@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Badamita - Rakit | Portal Informasi Geografis</title>
+<title>Kecamatan Rakit | Portal Informasi Geografis</title>
 
 <!-- FONT & ICON -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -89,7 +89,7 @@ body {
     100% {transform:translateY(-1400px) rotate(360deg) scale(0.8);opacity:0}
 }
 
-/* ================= NAVBAR ================= */
+/* ================= NAVBAR (DIPERKECIL) ================= */
 nav {
     position: sticky;
     top: 0;
@@ -108,7 +108,7 @@ nav.scrolled {
 .nav-container {
     max-width: 1200px;
     margin: auto;
-    padding: 1rem 1.5rem;
+    padding: 0.6rem 1.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -117,10 +117,10 @@ nav.scrolled {
 .logo {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
+    gap: 0.5rem;
     font-weight: 700;
     color: var(--dark-blue);
-    font-size: 1.2rem;
+    font-size: 1rem;
     cursor: pointer;
     transition: transform 0.3s ease;
 }
@@ -130,7 +130,7 @@ nav.scrolled {
 }
 
 .logo img {
-    height: 42px;
+    height: 35px;
     animation: spinSoft 6s linear infinite;
     filter: drop-shadow(0 0 8px var(--shadow));
 }
@@ -143,7 +143,12 @@ nav.scrolled {
 .nav-links {
     list-style: none;
     display: flex;
-    gap: 1.5rem;
+    gap: 1rem;
+    align-items: center;
+}
+
+.nav-links > li {
+    position: relative;
 }
 
 .nav-links a {
@@ -152,11 +157,12 @@ nav.scrolled {
     font-weight: 500;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.5rem 1rem;
-    border-radius: 12px;
+    gap: 0.3rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 10px;
     transition: all 0.3s ease;
     position: relative;
+    font-size: 0.9rem;
 }
 
 .nav-links a::before {
@@ -182,26 +188,90 @@ nav.scrolled {
     width: 80%;
 }
 
+/* ================= DROPDOWN MENU ================= */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-toggle {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.dropdown-toggle i.fa-chevron-down {
+    font-size: 0.7rem;
+    transition: transform 0.3s ease;
+}
+
+.dropdown.active .dropdown-toggle i.fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    min-width: 200px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.dropdown.active .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 0.8rem 1.2rem;
+    color: var(--text-dark);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-radius: 0;
+    font-size: 0.9rem;
+}
+
+.dropdown-menu a:hover {
+    background: var(--light-blue);
+    color: var(--dark-blue);
+    padding-left: 1.5rem;
+}
+
+.dropdown-menu a::before {
+    display: none;
+}
+
 .menu-toggle {
     display: none;
     flex-direction: column;
     cursor: pointer;
-    gap: 5px;
+    gap: 4px;
 }
 
 .menu-toggle span {
-    width: 25px;
-    height: 3px;
+    width: 22px;
+    height: 2.5px;
     background: var(--dark-blue);
     border-radius: 3px;
     transition: all 0.3s ease;
 }
 
-/* ================= HERO WITH BACKGROUND IMAGE ================= */
+/* ================= HERO WITH BACKGROUND IMAGE (DIPERKECIL) ================= */
 .hero {
     position: relative;
     text-align: center;
-    padding: 4rem 1rem 3rem;
+    padding: 2.5rem 1rem 2rem;
     animation: fadeUp 1s ease forwards;
     overflow: hidden;
 }
@@ -241,42 +311,42 @@ nav.scrolled {
     z-index: 2;
 }
 
-/* ================= HERO LOGO ================= */
+/* ================= HERO LOGO (DIPERKECIL) ================= */
 .hero-logo {
-    width: 160px;
-    height: 160px;
+    width: 120px;
+    height: 120px;
     margin: auto;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, var(--light-blue) 0%, var(--white) 100%);
-    box-shadow: 0 0 0 10px rgba(168, 216, 234, 0.2), 0 10px 40px var(--shadow);
+    box-shadow: 0 0 0 8px rgba(168, 216, 234, 0.2), 0 8px 30px var(--shadow);
     animation: pulse 3s infinite;
 }
 
 .hero-logo img {
-    width: 90px;
+    width: 70px;
     filter: drop-shadow(0 0 10px var(--shadow));
 }
 
 @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(168, 216, 234, 0.4), 0 10px 40px var(--shadow); }
-    70% { box-shadow: 0 0 0 25px rgba(168, 216, 234, 0), 0 10px 40px var(--shadow); }
-    100% { box-shadow: 0 0 0 0 rgba(168, 216, 234, 0), 0 10px 40px var(--shadow); }
+    0% { box-shadow: 0 0 0 0 rgba(168, 216, 234, 0.4), 0 8px 30px var(--shadow); }
+    70% { box-shadow: 0 0 0 20px rgba(168, 216, 234, 0), 0 8px 30px var(--shadow); }
+    100% { box-shadow: 0 0 0 0 rgba(168, 216, 234, 0), 0 8px 30px var(--shadow); }
 }
 
 .hero h1 {
-    margin-top: 1.5rem;
-    font-size: 2.8rem;
+    margin-top: 1rem;
+    font-size: 2.2rem;
     color: var(--dark-blue);
     text-shadow: 0 2px 10px var(--shadow);
 }
 
 .hero p {
-    margin-top: 0.6rem;
+    margin-top: 0.4rem;
     color: var(--text-dark);
-    font-size: 1.05rem;
+    font-size: 0.95rem;
 }
 
 .hero p b {
@@ -287,7 +357,7 @@ nav.scrolled {
 /* ================= STATS ================= */
 .stats-grid {
     max-width: 1100px;
-    margin: 2rem auto;
+    margin: 1.5rem auto;
     padding: 0 1rem;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -694,21 +764,30 @@ footer p {
     }
 
     .nav-links.active {
-        max-height: 400px;
+        max-height: 500px;
     }
 
     .nav-links li {
         width: 100%;
     }
 
-    .nav-links a {
+    .nav-links > li > a {
         width: 100%;
         padding: 1rem;
         justify-content: center;
     }
 
+    .dropdown-menu {
+        position: static;
+        box-shadow: none;
+        margin-top: 0;
+        background: rgba(168, 216, 234, 0.1);
+        border-radius: 8px;
+        margin: 0.5rem 0;
+    }
+
     .hero h1 {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
 
     .section-title {
@@ -733,11 +812,11 @@ footer p {
 
 @media (max-width: 480px) {
     .hero h1 {
-        font-size: 1.6rem;
+        font-size: 1.5rem;
     }
 
     .hero p {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
     }
 
     .stat-card {
@@ -753,11 +832,11 @@ footer p {
     }
     
     .logo span {
-        font-size: 1rem;
+        font-size: 0.9rem;
     }
     
     .logo img {
-        height: 35px;
+        height: 30px;
     }
 
     .map-title {
@@ -780,7 +859,7 @@ footer p {
     <div class="nav-container">
         <div class="logo" onclick="showSection('beranda', event)">
             <img src="logo banjar.jpg" alt="Logo">
-            <span>Badamita - Rakit</span>
+            <span>Kecamatan Rakit</span>
         </div>
         <div class="menu-toggle" onclick="toggleMenu()">
             <span></span>
@@ -790,8 +869,19 @@ footer p {
               
         <ul class="nav-links" id="navLinks">
             <li><a href="#beranda" data-section="beranda"><i class="fa fa-home"></i> Beranda</a></li>
-            <li><a href="maps/index.html" data-section="peta-desa"><i class="fa fa-map"></i> Peta Desa</a></li>
-            <li><a href="mapkecamatan1/index.html" data-section="peta-kecamatan"><i class="fa fa-globe-asia"></i> Peta Kecamatan</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" onclick="toggleDropdown(event)">
+                    <i class="fa fa-map"></i> Peta Desa
+                    <i class="fas fa-chevron-down"></i>
+                </a>
+                <div class="dropdown-menu">
+                    <a href="#" onclick="showMapSection('badamita', event)">Badamita</a>
+                    <a href="#" onclick="showMapSection('lengkong', event)">Lengkong</a>
+                    <a href="#" onclick="showMapSection('tanjunganom', event)">Tanjunganom</a>
+                    <a href="#" onclick="showMapSection('luwung', event)">Luwung</a>
+                </div>
+            </li>
+            <li><a href="#peta-kecamatan" data-section="peta-kecamatan"><i class="fa fa-globe-asia"></i> Peta Kecamatan</a></li>
             <li><a href="#tentang" data-section="tentang"><i class="fa fa-circle-info"></i> Tentang</a></li>
         </ul>
     </div>
@@ -802,7 +892,7 @@ footer p {
     <div class="hero-logo">
         <img src="logo banjar.jpg" alt="Logo Banjarnegara">
     </div>
-    <h1>Badamita - Rakit</h1>
+    <h1>Kecamatan Rakit</h1>
     <p><b>Satu Peta, Satu Data, Satu Kebijakan</b></p>
     <p>Portal Informasi Geografis Terpadu untuk Pembangunan Berkelanjutan</p>
 </section>
@@ -811,22 +901,22 @@ footer p {
 <div class="stats-grid">
     <div class="stat-card">
         <i class="fa fa-users"></i>
-        <div class="stat-number">5.323</div>
+        <div class="stat-number">52.023 Jiwa</div>
         <p>Penduduk</p>
     </div>
     <div class="stat-card">
         <i class="fa fa-home"></i>
-        <div class="stat-number">1.756</div>
+        <div class="stat-number">1287 KK</div>
         <p>Kepala Keluarga</p>
     </div>
     <div class="stat-card">
         <i class="fa fa-map"></i>
-        <div class="stat-number">360,000 Ha</div>
+        <div class="stat-number">3.244,624 hektar</div>
         <p>Luas Wilayah</p>
     </div>
     <div class="stat-card">
         <i class="fa fa-building"></i>
-        <div class="stat-number">5 RW & 27 RT</div>
+        <div class="stat-number">51 RW & 275 RT</div>
         <p>Struktur Wilayah</p>
     </div>
 </div>
@@ -837,14 +927,14 @@ footer p {
     <section id="beranda" class="content-section active">
         <h2 class="section-title"><i class="fas fa-home"></i> Selamat Datang</h2>
         <p class="welcome-text">
-            Selamat datang di Portal Informasi Geografis Badamita – Rakit. Platform digital ini dikembangkan sebagai sarana penyediaan informasi geografis, data pembangunan, serta kebijakan desa secara mudah, cepat, dan terintegrasi. Melalui portal ini, kami berkomitmen untuk menghadirkan informasi yang transparan, akurat, dan akuntabel guna mendukung proses perencanaan pembangunan desa yang tepat sasaran, berkelanjutan, dan berbasis data.
+            Selamat datang di Portal Informasi Geografis Kecamatan – Rakit. Platform digital ini dikembangkan sebagai sarana penyediaan informasi geografis, data pembangunan, serta kebijakan desa secara mudah, cepat, dan terintegrasi. Melalui portal ini, kami berkomitmen untuk menghadirkan informasi yang transparan, akurat, dan akuntabel guna mendukung proses perencanaan pembangunan desa yang tepat sasaran, berkelanjutan, dan berbasis data.
         </p>
 
         <div class="cards-grid">
-            <div class="card" onclick="showSection('peta-desa', event)">
+            <div class="card" onclick="event.preventDefault(); document.querySelector('.dropdown-toggle').click();">
                 <i class="fas fa-map"></i>
                 <h3>Peta Desa</h3>
-                <p>Jelajahi peta interaktif lengkap Desa Badamita dengan informasi detail wilayah dan fasilitas umum</p>
+                <p>Jelajahi peta interaktif lengkap 4 Desa (Badamita, Lengkong, Tanjunganom, Luwung) dengan informasi detail wilayah dan fasilitas umum</p>
             </div>
             <div class="card" onclick="showSection('peta-kecamatan', event)">
                 <i class="fas fa-globe-asia"></i>
@@ -866,32 +956,32 @@ footer p {
                 <div class="card" style="background: linear-gradient(135deg, rgba(17, 153, 142, 0.9) 0%, rgba(56, 239, 125, 0.9) 100%);">
                     <i class="fas fa-school" style="color: white !important;"></i>
                     <h3 style="color: white !important;">Pendidikan</h3>
-                    <p style="color: white !important;">Desa Badamita memiliki fasilitas pendidikan formal dan nonformal yang mendukung peningkatan kualitas sumber daya manusia, meliputi TK, SD/MI, SMP, serta pondok pesantren. Fasilitas pendidikan ini tersebar di beberapa titik wilayah desa dan menjadi pusat aktivitas pembelajaran masyarakat.</p>
+                    <p style="color: white !important;">Kecamatan Rakit memiliki fasilitas pendidikan formal dan nonformal yang mendukung peningkatan kualitas sumber daya manusia, meliputi TK, SD/MI, SMP, serta pondok pesantren. Fasilitas pendidikan ini tersebar di beberapa titik wilayah desa dan menjadi pusat aktivitas pembelajaran masyarakat.</p>
                 </div>
                 <div class="card" style="background: linear-gradient(135deg, rgba(240, 147, 251, 0.9) 0%, rgba(245, 87, 108, 0.9) 100%);">
                     <i class="fas fa-hospital" style="color: white !important;"></i>
                     <h3 style="color: white !important;">Kesehatan</h3>
-                    <p style="color: white !important;">Layanan kesehatan masyarakat Desa Badamita didukung oleh Badan Kesehatan Desa (BKD) dan Posyandu aktif yang berperan dalam pelayanan kesehatan dasar, pemantauan ibu dan anak, serta kegiatan promotif dan preventif kesehatan masyarakat.</p>
+                    <p style="color: white !important;">Layanan kesehatan didukung oleh Badan Kesehatan Desa (BKD) dan Posyandu aktif yang berperan dalam pelayanan kesehatan dasar, pemantauan ibu dan anak, serta kegiatan promotif dan preventif kesehatan masyarakat.</p>
                 </div>
                 <div class="card" style="background: linear-gradient(135deg, rgba(250, 112, 154, 0.9) 0%, rgba(254, 225, 64, 0.9) 100%);">
                     <i class="fas fa-mosque" style="color: white !important;"></i>
                     <h3 style="color: white !important;">Ibadah</h3>
-                    <p style="color: white !important;">Sarana ibadah di Kecamatan Rakit dan Desa Badamita terdiri dari masjid dan musholla yang tersebar di seluruh wilayah desa. Keberadaan fasilitas ini mendukung aktivitas keagamaan serta memperkuat kehidupan sosial dan spiritual masyarakat.</p>
+                    <p style="color: white !important;">Sarana ibadah di Kecamatan Rakit  terdiri dari masjid dan musholla yang tersebar di seluruh wilayah desa. Keberadaan fasilitas ini mendukung aktivitas keagamaan serta memperkuat kehidupan sosial dan spiritual masyarakat.</p>
                 </div>
                 <div class="card" style="background: linear-gradient(135deg, rgba(48, 207, 208, 0.9) 0%, rgba(51, 8, 103, 0.9) 100%);">
                     <i class="fas fa-store" style="color: white !important;"></i>
                     <h3 style="color: white !important;">Ekonomi</h3>
-                    <p style="color: white !important;">Perekonomian Desa Badamita ditopang oleh usaha mikro, kecil, dan menengah (UMKM), sektor perdagangan, serta keberadaan toko ritel seperti Alfamart. Aktivitas ekonomi ini menjadi penggerak utama kesejahteraan masyarakat desa.</p>
+                    <p style="color: white !important;">Perekonomian Kecamatan ditopang oleh usaha mikro, kecil, dan menengah (UMKM), sektor perdagangan, serta keberadaan toko ritel seperti Alfamart. Aktivitas ekonomi ini menjadi penggerak utama kesejahteraan masyarakat desa.</p>
                 </div>
                 <div class="card" style="background: linear-gradient(135deg, rgba(250, 174, 50, 0.9) 0%, rgba(250, 82, 82, 0.9) 100%);">
                     <i class="fas fa-futbol" style="color: white !important;"></i>
                     <h3 style="color: white !important;">Olahraga</h3>
-                    <p style="color: white !important;">Kecamatan Rakit dan Desa Badamita memiliki fasilitas olahraga berupa lapangan sepak bola yang digunakan sebagai sarana olahraga dan kegiatan sosial masyarakat, serta mendukung aktivitas kepemudaan desa.</p>
+                    <p style="color: white !important;">Kecamatan Rakit memiliki fasilitas olahraga berupa lapangan sepak bola yang digunakan sebagai sarana olahraga dan kegiatan sosial masyarakat, serta mendukung aktivitas kepemudaan desa.</p>
                 </div>
                 <div class="card" style="background: linear-gradient(135deg, rgba(168, 237, 234, 0.9) 0%, rgba(254, 214, 227, 0.9) 100%);">
                     <i class="fas fa-landmark" style="color: white !important;"></i>
                     <h3 style="color: white !important;">Pemerintahan</h3>
-                    <p style="color: white !important;">Fasilitas pemerintahan Kecamatan Rakit dan Desa Badamita meliputi Kantor kecamatan, Kantor kepala desa, dan sarana pelayanan publik lainnya yang berfungsi sebagai pusat administrasi, pelayanan masyarakat, dan kegiatan pemerintahan desa.</p>
+                    <p style="color: white !important;">Fasilitas pemerintahan Kecamatan Rakit meliputi Kantor kecamatan, Kantor kepala desa, dan sarana pelayanan publik lainnya yang berfungsi sebagai pusat administrasi, pelayanan masyarakat, dan kegiatan pemerintahan desa.</p>
                 </div>
             </div>
         </div>
@@ -917,17 +1007,6 @@ footer p {
         </div>
 
         <div class="tujuan profile-card">
-            <h4>Sejarah Desa</h4>
-            <p>Sejarah Desa Badamita berakar dari kisah babad yang bersumber dari Babad Badapamita karya Ki Suparno serta cerita lisan yang diwariskan secara turun-temurun oleh masyarakat setempat. Kisah ini menjadi bagian penting dari identitas desa dan mencerminkan kearifan lokal yang terus dijaga hingga kini. Cerita sejarah Badamita tidak hanya dipahami sebagai legenda, tetapi juga sebagai warisan budaya yang menjelaskan asal-usul wilayah, nilai-nilai masyarakat, serta hubungan antara manusia, alam, dan kekuasaan pada masa lampau.</p>
-
-            <p>Dalam babad tersebut diceritakan bahwa asal-usul Desa Badamita berkaitan dengan peristiwa pada masa Kerajaan Majapahit, khususnya tokoh Tumenggung Citra Yuda yang dikenal memiliki kesaktian dan memimpin wilayah Katumenggungan Larangan. Akibat intrik politik Raja Durga Meluh, Tumenggung Citra Yuda gugur, sehingga memicu pelarian adiknya, Setya Guna. Peristiwa ini diikuti dengan pengejaran pasukan Majapahit yang melintasi berbagai wilayah, meninggalkan jejak sejarah berupa penamaan tempat-tempat yang hingga kini masih dikenal di wilayah Banjarnegara dan sekitarnya.</p>
-
-            <p>Pengejaran tersebut akhirnya dihentikan karena kondisi alam dan situasi wilayah Katumenggungan yang dianggap tidak memungkinkan untuk dikuasai. Pasukan Majapahit kemudian berpamitan kepada masyarakat setempat, yang dalam kisah babad dikenal sebagai peristiwa bada pamita. Dari istilah inilah kemudian muncul nama Badapamita yang selanjutnya berkembang menjadi Badamita. Peristiwa ini menjadi simbol berakhirnya konflik sekaligus awal terbentuknya wilayah pemukiman yang berkembang menjadi desa.</p>
-
-            <p>Seiring perjalanan waktu, Desa Badamita tumbuh menjadi wilayah yang kini berada di Kecamatan Rakit, Kabupaten Banjarnegara, dengan luas wilayah serta batas-batas desa yang jelas. Berbagai nama dusun dan kopak di Desa Badamita dipercaya berasal dari peristiwa sejarah, tanda alam, serta aktivitas masyarakat pada masa lalu. Hingga saat ini, masyarakat Desa Badamita terus menjaga peninggalan sejarah tersebut sebagai bagian dari identitas desa dan sumber nilai budaya yang memperkuat rasa kebersamaan serta kecintaan terhadap tanah kelahiran.</p>
-        </div>
-
-        <div class="tujuan profile-card">
             <h4>Visi Misi Kecamatan</h4>
             <p><strong>VISI</strong></p>
             <p>"Menuju Desa Rakit yang Sejahtera, Bermartabat, Adil dan Makmur"</p>
@@ -944,7 +1023,7 @@ footer p {
 </div>
 
 <!-- MAP SECTIONS (FULLSCREEN) -->
-<section id="peta-desa" class="map-section">
+<section id="peta-badamita" class="map-section">
     <div class="map-header">
         <button class="back-button" onclick="showSection('beranda')">
             <i class="fas fa-arrow-left"></i> Kembali
@@ -952,7 +1031,43 @@ footer p {
         <h2 class="map-title"><i class="fas fa-map"></i> Peta Desa Badamita</h2>
     </div>
     <div class="map-container">
-        <iframe src="maps/index.html" title="Peta Desa"></iframe>
+        <iframe src="Badamita/index.html" title="Peta Desa Badamita"></iframe>
+    </div>
+</section>
+
+<section id="peta-lengkong" class="map-section">
+    <div class="map-header">
+        <button class="back-button" onclick="showSection('beranda')">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </button>
+        <h2 class="map-title"><i class="fas fa-map"></i> Peta Desa Lengkong</h2>
+    </div>
+    <div class="map-container">
+        <iframe src="Lengkong/index.html" title="Peta Desa Lengkong"></iframe>
+    </div>
+</section>
+
+<section id="peta-tanjunganom" class="map-section">
+    <div class="map-header">
+        <button class="back-button" onclick="showSection('beranda')">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </button>
+        <h2 class="map-title"><i class="fas fa-map"></i> Peta Desa Tanjunganom</h2>
+    </div>
+    <div class="map-container">
+        <iframe src="Tanjunganom/index.html" title="Peta Desa Tanjunganom"></iframe>
+    </div>
+</section>
+
+<section id="peta-luwung" class="map-section">
+    <div class="map-header">
+        <button class="back-button" onclick="showSection('beranda')">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </button>
+        <h2 class="map-title"><i class="fas fa-map"></i> Peta Desa Luwung</h2>
+    </div>
+    <div class="map-container">
+        <iframe src="Luwung/index.html" title="Peta Desa Luwung"></iframe>
     </div>
 </section>
 
@@ -964,13 +1079,13 @@ footer p {
         <h2 class="map-title"><i class="fas fa-map-marked"></i> Peta Kecamatan Rakit</h2>
     </div>
     <div class="map-container">
-        <iframe src="mapkecamatan1/index.html" title="Peta Kecamatan"></iframe>
+        <iframe src="kecamatanrakit/index.html" title="Peta Kecamatan"></iframe>
     </div>
 </section>
 
 <footer>
     <div style="max-width: 1200px; margin: 0 auto;">
-        <p>&copy; 2025 Badamita - Rakit. Dibuat oleh Putri Awaliatuz Zahra. All rights reserved.</p>
+        <p>&copy; 2025 Kecamatan Rakit. Dibuat oleh Putri Awaliatuz Zahra. All rights reserved.</p>
     </div>
 </footer>
 
@@ -1014,6 +1129,34 @@ function showSection(sectionId, event) {
     }
     
     closeMenu();
+    closeAllDropdowns();
+}
+
+function showMapSection(desaName, event) {
+    if (event) {
+        event.preventDefault();
+    }
+    showSection('peta-' + desaName);
+}
+
+function toggleDropdown(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const dropdown = event.currentTarget.closest('.dropdown');
+    const isActive = dropdown.classList.contains('active');
+    
+    closeAllDropdowns();
+    
+    if (!isActive) {
+        dropdown.classList.add('active');
+    }
+}
+
+function closeAllDropdowns() {
+    document.querySelectorAll('.dropdown').forEach(dd => {
+        dd.classList.remove('active');
+    });
 }
 
 function toggleMenu() {
@@ -1046,7 +1189,14 @@ window.addEventListener('scroll', function() {
     }
 });
 
-document.querySelectorAll('.nav-links a').forEach(link => {
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.dropdown')) {
+        closeAllDropdowns();
+    }
+});
+
+document.querySelectorAll('.nav-links > li > a[data-section]').forEach(link => {
     link.addEventListener('click', function(e) {
         e.preventDefault();
         const sectionId = this.getAttribute('data-section');
@@ -1056,4 +1206,4 @@ document.querySelectorAll('.nav-links a').forEach(link => {
 </script>
 
 </body>
-</html
+</html>

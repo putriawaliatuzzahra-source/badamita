@@ -1,0 +1,1 @@
+var json_Makam_6 = {"type":"FeatureCollection","name":"Makam_6","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"features":[{"type":"Feature","properties":{"NAMOBJ":"Makam Luwung","FCODE":null,"REMARK":null,"SRS_ID":null,"LCODE":null,"METADATA":null,"TPMKM":null},"geometry":{"type":"Point","coordinates":[109.583973362913909,-7.409546148537141]}}]}

@@ -1,1 +1,0 @@
-var json_TempatPemakaman_25 = {"type":"FeatureCollection","name":"TempatPemakaman_25","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"features":[{"type":"Feature","properties":{"id":"1","Kuburan":"Pemakaman Umum Badamita"},"geometry":{"type":"Point","coordinates":[109.566328447041187,-7.393958314759079]}}]}

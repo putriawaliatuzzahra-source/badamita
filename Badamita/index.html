@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <title>WebGIS Desa Badamita - Premium Blue Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #1E3A5F; /* Biru Tua Profesional */
+            --secondary: #2C5282;
+            --accent: #3182CE; /* Biru Terang */
+            --white: #ffffff;
+            --bg-light: #F7FAFC;
+            --shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        html, body { height: 100%; margin: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; overflow: hidden; }
+        
+        #app-container { display: flex; width: 100%; height: 100%; }
+
+        /* Sidebar & Catalog */
+        #sidebar {
+            width: 360px;
+            height: 100%;
+            background: var(--white);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.15);
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            background: var(--primary);
+            color: white;
+            text-align: center;
+            border-bottom: 4px solid var(--accent);
+        }
+
+        .search-container { padding: 20px; border-bottom: 1px solid #edf2f7; }
+        .search-box { position: relative; }
+        .search-box i { position: absolute; left: 12px; top: 14px; color: var(--accent); }
+        .search-box input {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+        .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2); }
+
+        #catalog-list { flex: 1; overflow-y: auto; padding: 15px; background: var(--bg-light); }
+        .catalog-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s ease;
+            border: 1px solid #edf2f7;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .catalog-item:hover { 
+            border-color: var(--accent); 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .catalog-item i { color: var(--accent); font-size: 1.2rem; }
+        .catalog-item h4 { margin: 0; font-size: 0.95rem; color: var(--primary); flex: 1; font-weight: 600; }
+        .catalog-tag { font-size: 0.7rem; background: #ebf8ff; color: #2b6cb0; padding: 4px 8px; border-radius: 6px; font-weight: bold; }
+
+        /* Map */
+        #map { flex: 1; height: 100%; position: relative; }
+
+        /* Custom Label Styling */
+        .custom-label {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1.5px solid var(--primary);
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Compass Control */
+        .compass-control {
+            background: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            font-size: 22px;
+            transition: 0.2s;
+        }
+        .compass-control:hover { background: var(--bg-light); color: var(--accent); }
+
+        @media (max-width: 768px) {
+            #app-container { flex-direction: column; }
+            #sidebar { width: 100%; height: 40%; order: 2; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="app-container">
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <h3 style="margin:0; letter-spacing: 1px;">🌍 WebGIS Badamita</h3>
+            <p style="margin:5px 0 0 0; font-size: 0.8rem; opacity: 0.8;">Sistem Informasi Geografis Desa Badamita</p>
+        </div>
+        <div class="search-container">
+            <div class="search-box">
+                <i class="fa fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Cari fasilitas, jalan, atau RT/RW..." onkeyup="filterCatalog()">
+            </div>
+        </div>
+        <div id="catalog-list">
+            <!-- Items injected by JS -->
+        </div>
+    </div>
+    <div id="map"></div>
+</div>
+
+<!-- JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- DATA (MENGGUNAKAN SEMUA DATA AWAL ANDA) -->
+<script src="data/BatasWilayahDesa_1.js"></script>
+<script src="data/DesaBadamita_2.js"></script>
+<script src="data/LapanganDesa_5.js"></script>
+<script src="data/RW5GENDANI_6.js"></script>
+<script src="data/RW4SOKARAJA_7.js"></script>
+<script src="data/RW3PAGUAN_8.js"></script>
+<script src="data/RW2KARANGSAGA_9.js"></script>
+<script src="data/RW1BADAMITA_10.js"></script>
+<script src="data/RTDIRW1BADAMITA_15.js"></script>
+<script src="data/JlRayaBadamita_20.js"></script>
+<script src="data/Sungai_21.js"></script>
+<script src="data/building_22.js"></script>
+<script src="data/Sekolah_23.js"></script>
+<script src="data/TempatPemakaman_24.js"></script>
+<script src="data/UMKM_28.js"></script>
+<script src="data/TempatIbadah_31.js"></script>
+<script src="data/FasilitasKesehatan_32.js"></script>
+<script src="data/BalaiDesa_35.js"></script>
+
+<script>
+// ================= 1. INIT MAP =================
+var map = L.map('map', { zoomControl: false }).setView([-7.40, 109.555], 14);
+
+// ================= 2. BASEMAPS =================
+var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OSM' });
+var satellite = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { attribution: '&copy; Google Satellite' });
+satellite.addTo(map);
+
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+// ================= 3. LAYER GROUPS =================
+var groupBatasLuar = L.featureGroup().addTo(map); // Selalu muncul
+var groupDetailDesa = L.featureGroup(); // Poligon Desa, Sawah, Kebun, Rumah (Zoom 14+)
+var groupBalaiDesa = L.featureGroup(); // Balai Desa & Label (Zoom 14+)
+var groupFasilitas = L.featureGroup(); // Fasilitas detail (Zoom 16+)
+
+// Katalog Array
+var catalogData = [];
+
+// ================= 4. CUSTOM COMPASS =================
+var CompassControl = L.Control.extend({
+    options: { position: 'topright' },
+    onAdd: function (map) {
+        var div = L.DomUtil.create('div', 'compass-control');
+        div.innerHTML = '<i class="fa fa-compass"></i>';
+        div.title = "Reset View";
+        div.onclick = function() { map.flyTo([-7.40, 109.555], 14); };
+        return div;
+    }
+});
+map.addControl(new CompassControl());
+
+// ================= 5. LOGIK PEMROSESAN LAYER =================
+
+function setupPolygon(json, styleDefault, label, targetGroup) {
+    if (typeof json === 'undefined') return;
+    L.geoJson(json, {
+        style: styleDefault,
+        onEachFeature: function(f, l) {
+            var name = f.properties.Nama || f.properties.NAMOBJ || label;
+            l.bindPopup("<b>" + label + ":</b> " + name);
+            
+            l.on('mouseover', function() {
+                l.setStyle({ fillOpacity: 0.6, weight: 3, color: '#3182CE' });
+            });
+            l.on('mouseout', function() {
+                l.setStyle(styleDefault);
+            });
+            l.on('click', function() { map.fitBounds(l.getBounds()); });
+        }
+    }).addTo(targetGroup);
+}
+
+function setupLine(json, color, weight, label, targetGroup) {
+    if (typeof json === 'undefined') return;
+    L.geoJson(json, {
+        style: { color: color, weight: weight, opacity: 0.8 },
+        onEachFeature: function(f, l) {
+            var name = f.properties.Nama || label;
+            l.bindPopup("<b>" + label + ":</b> " + name);
+            catalogData.push({ name: name, latlng: l.getBounds().getCenter(), label: label, icon: 'fa-road' });
+        }
+    }).addTo(targetGroup);
+}
+
+function setupPoint(json, iconPath, label, targetGroup) {
+    if (typeof json === 'undefined') return;
+    L.geoJson(json, {
+        pointToLayer: function(f, latlng) {
+            var name = f.properties.Nama || f.properties.Nama_Sekolah || f.properties.Nama_UMKM || f.properties.Nama_Bangunan || label;
+            var marker = L.marker(latlng, {
+                icon: L.icon({ iconUrl: iconPath, iconSize: [28, 28] })
+            });
+
+            marker.bindTooltip(name, { 
+                permanent: true, direction: 'bottom', className: 'custom-label', offset: [0, 10]
+            });
+            
+            marker.bindPopup("<b>" + label + ":</b> " + name);
+            catalogData.push({ name: name, latlng: latlng, label: label, icon: 'fa-location-dot' });
+            return marker;
+        }
+    }).addTo(targetGroup);
+}
+
+// ================= 6. LOAD DATA =================
+
+// Hanya Batas Desa yang masuk groupBatasLuar (Selalu Kelihatan)
+setupPolygon(window.json_BatasWilayahDesa_1, { color: '#1E3A5F', weight: 4, fillOpacity: 0.05, dashArray: '5, 5' }, 'Batas Desa', groupBatasLuar);
+
+// Sisanya masuk groupDetailDesa (Hanya Kelihatan pas Zoom In)
+setupPolygon(window.json_DesaBadamita_2, { color: '#2B6CB0', weight: 1, fillOpacity: 0.1 }, 'Wilayah Desa', groupDetailDesa);
+setupPolygon(window.json_building_22, { color: '#718096', weight: 0.5, fillOpacity: 0.5 }, 'Bangunan/Rumah', groupDetailDesa);
+
+// Infrastruktur
+setupLine(window.json_Sungai_21, '#4299E1', 4, 'Sungai', groupDetailDesa);
+setupLine(window.json_JlRayaBadamita_20, '#A0AEC0', 3, 'Jalan', groupDetailDesa);
+
+// Point Balai Desa (Zoom 14+)
+setupPoint(window.json_BalaiDesa_35, 'https://cdn-icons-png.flaticon.com/512/3533/3533544.png', 'Balai Desa', groupBalaiDesa);
+
+// Point Fasilitas Lainnya (Zoom 16+)
+setupPoint(window.json_Sekolah_23, 'https://cdn-icons-png.flaticon.com/512/2913/2913974.png', 'Sekolah', groupFasilitas);
+setupPoint(window.json_TempatIbadah_31, 'https://cdn-icons-png.flaticon.com/512/591/591572.png', 'Tempat Ibadah/Masjid', groupFasilitas);
+setupPoint(window.json_TempatPemakaman_24, 'https://cdn-icons-png.flaticon.com/512/2891/2891415.png', 'Pemakaman', groupFasilitas);
+setupPoint(window.json_UMKM_28, 'https://cdn-icons-png.flaticon.com/512/2331/2331970.png', 'UMKM', groupFasilitas);
+setupPoint(window.json_FasilitasKesehatan_32, 'https://cdn-icons-png.flaticon.com/512/2966/2966327.png', 'Faskes', groupFasilitas);
+
+// ================= 7. LOGIK ZOOM & VISIBILITY (SANGAT PENTING) =================
+
+function checkZoom() {
+    var zoom = map.getZoom();
+    
+    // Zoom < 14: Sembunyikan semua kecuali Batas Luar
+    if (zoom < 14) {
+        if (map.hasLayer(groupDetailDesa)) map.removeLayer(groupDetailDesa);
+        if (map.hasLayer(groupBalaiDesa)) map.removeLayer(groupBalaiDesa);
+        if (map.hasLayer(groupFasilitas)) map.removeLayer(groupFasilitas);
+    } 
+    // Zoom 14 & 15: Tampilkan Detail Desa + Balai Desa
+    else if (zoom >= 14 && zoom < 16) {
+        if (!map.hasLayer(groupDetailDesa)) map.addLayer(groupDetailDesa);
+        if (!map.hasLayer(groupBalaiDesa)) map.addLayer(groupBalaiDesa);
+        if (map.hasLayer(groupFasilitas)) map.removeLayer(groupFasilitas);
+    } 
+    // Zoom 16+: Tampilkan Semuanya (Termasuk Masjid, Makam, dll)
+    else if (zoom >= 16) {
+        if (!map.hasLayer(groupDetailDesa)) map.addLayer(groupDetailDesa);
+        if (!map.hasLayer(groupBalaiDesa)) map.addLayer(groupBalaiDesa);
+        if (!map.hasLayer(groupFasilitas)) map.addLayer(groupFasilitas);
+    }
+}
+
+map.on('zoomend', checkZoom);
+checkZoom();
+
+// ================= 8. KATALOG & PENCARIAN =================
+
+function renderCatalog(data) {
+    var list = document.getElementById('catalog-list');
+    list.innerHTML = '';
+    
+    if(data.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Data tidak ditemukan...</p>';
+        return;
+    }
+
+    data.forEach(item => {
+        var div = document.createElement('div');
+        div.className = 'catalog-item';
+        div.innerHTML = `
+            <i class="fa ${item.icon}"></i>
+            <h4>${item.name}</h4>
+            <span class="catalog-tag">${item.label}</span>
+        `;
+        div.onclick = function() {
+            map.flyTo(item.latlng, 18);
+        };
+        list.appendChild(div);
+    });
+}
+
+function filterCatalog() {
+    var query = document.getElementById('searchInput').value.toLowerCase();
+    var filtered = catalogData.filter(i => 
+        i.name.toLowerCase().includes(query) || 
+        i.label.toLowerCase().includes(query)
+    );
+    renderCatalog(filtered);
+}
+
+setTimeout(() => {
+    renderCatalog(catalogData);
+}, 1000);
+
+// ================= 9. LAYER CONTROL =================
+var baseMaps = { "Satelit Premium": satellite, "Peta Standar": osm };
+var overlayMaps = { 
+    "Batas Wilayah": groupBatasLuar,
+    "Detail Desa": groupDetailDesa,
+    "Kantor Balai Desa": groupBalaiDesa, 
+    "Fasilitas Publik": groupFasilitas 
+};
+L.control.layers(baseMaps, overlayMaps, { collapsed: true }).addTo(map);
+
+</script>
+</body>
+</html>

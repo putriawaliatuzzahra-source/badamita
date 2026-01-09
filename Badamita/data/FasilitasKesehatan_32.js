@@ -1,0 +1,1 @@
+var json_FasilitasKesehatan_32 = {"type":"FeatureCollection","name":"FasilitasKesehatan_32","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"features":[{"type":"Feature","properties":{"id":"1","Faskes":"Faskes Pak Nono"},"geometry":{"type":"Point","coordinates":[109.554010131153831,-7.401529673236517]}}]}

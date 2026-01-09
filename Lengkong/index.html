@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+    
+    <!-- CSS Dependencies -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #1d3557;
+            --secondary: #457b9d;
+            --accent: #e63946;
+            --bg-light: #f8fafc;
+            --white: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        html, body {
+            width: 100%; height: 100%; padding: 0; margin: 0;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            background-color: var(--bg-light);
+        }
+
+        #app-container { display: flex; width: 100%; height: 100%; }
+
+        /* Sidebar Styling */
+        #sidebar {
+            width: 380px; height: 100%; background: var(--white);
+            display: flex; flex-direction: column; z-index: 1000;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.05);
+        }
+
+        .sidebar-header {
+            padding: 30px 25px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+
+        .sidebar-header h3 { margin: 0; font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
+        .sidebar-header p { margin: 8px 0 0 0; font-size: 0.85rem; opacity: 0.9; display: flex; align-items: center; gap: 8px; }
+
+        .search-container { padding: 20px; border-bottom: 1px solid #f1f5f9; }
+        .search-box { position: relative; display: flex; align-items: center; }
+        .search-box i { position: absolute; left: 15px; color: var(--secondary); }
+        .search-container input {
+            padding: 12px 12px 12px 45px;
+            border: 2px solid #f1f5f9; border-radius: 12px;
+            font-size: 0.9rem; outline: none; transition: 0.3s;
+            background: #f8fafc;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .search-container input:focus { border-color: var(--secondary); background: white; }
+
+        #catalog-list { flex: 1; overflow-y: auto; padding: 15px; background: #f8fafc; }
+        .catalog-item {
+            background: var(--white); padding: 16px; margin-bottom: 12px;
+            border-radius: 14px; border: 1px solid #f1f5f9;
+            cursor: pointer; transition: 0.2s;
+        }
+        .catalog-item:hover { transform: translateY(-2px); border-color: var(--secondary); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .catalog-item h4 { margin: 0 0 8px 0; font-size: 0.95rem; color: var(--text-main); font-weight: 700; }
+        .badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: #f1f5f9; padding: 4px 10px; border-radius: 6px;
+            font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;
+        }
+
+        .empty-catalog {
+            text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 0.9rem;
+        }
+
+        #map { flex: 1; height: 100%; cursor: pointer; }
+
+        /* Labels Style */
+        .custom-label {
+            background: white; border: 2px solid var(--secondary);
+            border-radius: 6px; padding: 3px 8px;
+            font-size: 11px; font-weight: 800; color: var(--primary);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            white-space: nowrap;
+        }
+
+        /* Label Khusus Kantor Desa */
+        .highlight-label {
+            background: var(--accent) !important;
+            color: white !important;
+            border-color: white !important;
+            font-size: 13px !important;
+            padding: 5px 12px !important;
+            z-index: 1000 !important;
+        }
+
+        .compass-control {
+            background: white; width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer;
+            color: var(--primary); font-size: 1.2rem; margin: 10px;
+        }
+
+        @media (max-width: 768px) {
+            #sidebar { position: fixed; bottom: 0; width: 100%; height: 35%; border-radius: 20px 20px 0 0; }
+        }
+    </style>
+    <title>SIG Desa Lengkong - Peta Digital Interaktif</title>
+</head>
+<body>
+
+<div id="app-container">
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <h3 style="margin:0; letter-spacing: 1px;">🌍 WebGIS Lengkong</h3>
+            <p style="margin:5px 0 0 0; font-size: 0.8rem; opacity: 0.8;">Sistem Informasi Geografis Desa Lengkong</p>
+        </div>
+        <div class="search-container" id="searchWrapper">
+            <div class="search-box">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Cari fasilitas..." onkeyup="filterCatalog()">
+            </div>
+        </div>
+        <div id="catalog-list"></div>
+    </div>
+    <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Data Sources -->
+<script src="data/DesaLengkong_1.js"></script>
+<script src="data/Jalan_3.js"></script>
+<script src="data/Irigasi_4.js"></script>
+<script src="data/Sungai_5.js"></script>
+<script src="data/Makam_6.js"></script>
+<script src="data/Kesehatan_7.js"></script>
+<script src="data/Pendidikan_8.js"></script>
+<script src="data/SaranaIbadah_9.js"></script>
+<script src="data/Pemerintahan_10.js"></script>
+
+<script>
+    // Konfigurasi Zoom Levels
+    const CONFIG = {
+        zoomFar: 14.5,    // Level: Zoom Out (HANYA BATAS DESA)
+        zoomMid: 16.5,    // Level: Awal Buka (HANYA KANTOR DESA)
+        zoomDetail: 18,   // Level: Zoom In (SEMUA MUNCUL)
+        maxZoom: 20
+    };
+
+    // Inisialisasi Peta (koordinat awal akan dioverride oleh data GeoJSON)
+    var map = L.map('map', {
+        center: [-7.389, 109.594],
+        zoom: CONFIG.zoomMid,
+        zoomControl: false,
+        maxZoom: CONFIG.maxZoom
+    });
+
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' });
+    var hybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+        maxZoom: 20, subdomains:['mt0','mt1','mt2','mt3'], attribution: '© Google'
+    }).addTo(map);
+
+    L.control.layers({ "Satelit": hybrid, "Peta Jalan": osm }, null, { position: 'topright' }).addTo(map);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    var groupBatasDesa = L.geoJson(null).addTo(map);
+    var groupFasilitas = L.layerGroup().addTo(map); 
+    var groupInfrastruktur = L.layerGroup().addTo(map);
+
+    var catalogData = [];
+    var centerPoint = null; // Akan diisi otomatis dari data
+
+    const getIcon = (faClass, color, isBig = false) => {
+        const size = isBig ? 42 : 32;
+        return L.divIcon({
+            html: `<div style="background:white; width:${size}px; height:${size}px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.3); border:3px solid ${color};">
+                    <i class="${faClass}" style="color:${color}; font-size:${size/2}px;"></i>
+                   </div>`,
+            className: 'marker-div-icon',
+            iconSize: [size, size],
+            iconAnchor: [size/2, size/2]
+        });
+    };
+
+    function updateVisibility() {
+        let currentZoom = map.getZoom();
+        let listContainer = document.getElementById('catalog-list');
+        let searchWrapper = document.getElementById('searchWrapper');
+
+        // 1. KONDISI: ZOOM OUT -> HANYA BATAS DESA
+        if (currentZoom < CONFIG.zoomMid - 0.5) {
+            groupFasilitas.clearLayers();
+            groupInfrastruktur.clearLayers();
+            listContainer.innerHTML = '<div class="empty-catalog">Perbesar peta untuk melihat titik lokasi...</div>';
+            searchWrapper.style.opacity = "0.3";
+            return;
+        }
+
+        // 2. KONDISI: AWAL BUKA / ZOOM SEDANG -> HANYA KANTOR DESA
+        if (currentZoom >= CONFIG.zoomMid - 0.5 && currentZoom < CONFIG.zoomDetail) {
+            groupInfrastruktur.addTo(map); 
+            groupFasilitas.clearLayers();
+            renderMarkers(true); // Filter: True (Hanya Kantor Desa)
+            listContainer.innerHTML = '<div class="empty-catalog">Zoom lebih dekat untuk melihat detail fasilitas...</div>';
+            searchWrapper.style.opacity = "0.6";
+        } 
+        
+        // 3. KONDISI: ZOOM IN -> SEMUA FASILITAS MUNCUL
+        else if (currentZoom >= CONFIG.zoomDetail) {
+            groupFasilitas.clearLayers();
+            renderMarkers(false); // Filter: False (Semua muncul)
+            renderCatalog(catalogData);
+            searchWrapper.style.opacity = "1";
+        }
+    }
+
+    map.on('zoomend', updateVisibility);
+
+    function processGeoData() {
+        // Load Batas Desa
+        if (typeof json_DesaLengkong_1 !== 'undefined') {
+            groupBatasDesa.addData(json_DesaLengkong_1);
+            groupBatasDesa.setStyle({ color: '#e63946', weight: 4, fillOpacity: 0.05, fillColor: '#1d3557' });
+            
+            // Simpan Center Point dari Data GeoJSON asli
+            centerPoint = groupBatasDesa.getBounds().getCenter();
+            
+            // Langsung fokus ke batas desa
+            map.fitBounds(groupBatasDesa.getBounds(), { padding: [30, 30] });
+            
+            // Paksa ke level zoom awal (Kantor Desa) setelah animasi fitBounds
+            setTimeout(() => { 
+                map.setView(centerPoint, CONFIG.zoomMid); 
+                updateVisibility();
+            }, 600);
+        }
+
+        // Load Jalan
+        if (typeof json_Jalan_3 !== 'undefined') {
+            L.geoJson(json_Jalan_3, { style: {color:'#f59e0b', weight:2, opacity: 0.5} }).addTo(groupInfrastruktur);
+        }
+    }
+
+    function renderMarkers(onlyKantorDesa) {
+        const pointLayers = [
+            { data: typeof json_Pemerintahan_10 !== 'undefined' ? json_Pemerintahan_10 : null, type: 'Kantor', icon: 'fa-building-columns', color: '#1e3a8a' },
+            { data: typeof json_Pendidikan_8 !== 'undefined' ? json_Pendidikan_8 : null, type: 'Sekolah', icon: 'fa-graduation-cap', color: '#0369a1' },
+            { data: typeof json_Kesehatan_7 !== 'undefined' ? json_Kesehatan_7 : null, type: 'Kesehatan', icon: 'fa-heart-pulse', color: '#be123c' },
+            { data: typeof json_SaranaIbadah_9 !== 'undefined' ? json_SaranaIbadah_9 : null, type: 'Ibadah', icon: 'fa-mosque', color: '#0f766e' },
+            { data: typeof json_Makam_6 !== 'undefined' ? json_Makam_6 : null, type: 'Makam', icon: 'fa-monument', color: '#4b5563' }
+        ];
+
+        pointLayers.forEach(layerCfg => {
+            if (layerCfg.data) {
+                L.geoJson(layerCfg.data, {
+                    onEachFeature: function(f, l) {
+                        let name = f.properties.NAMOBJ || "Tanpa Nama";
+                        let lowerName = name.toLowerCase();
+                        let isKantorDesa = lowerName.includes("kantor") || lowerName.includes("balai desa") || lowerName.includes("pemerintah desa");
+                        
+                        if (onlyKantorDesa && !isKantorDesa) return;
+
+                        let marker = L.marker(l.getLatLng(), { 
+                            icon: getIcon(`fa-solid ${layerCfg.icon}`, isKantorDesa ? '#e63946' : layerCfg.color, isKantorDesa)
+                        });
+                        
+                        marker.bindTooltip(name, { 
+                            permanent: true, direction: 'bottom', 
+                            className: isKantorDesa ? 'custom-label highlight-label' : 'custom-label', 
+                            offset: [0, 22] 
+                        });
+                        
+                        marker.addTo(groupFasilitas);
+                    }
+                });
+            }
+        });
+    }
+
+    function prepareCatalogData() {
+        const pointLayers = [
+            { data: typeof json_Pemerintahan_10 !== 'undefined' ? json_Pemerintahan_10 : null, type: 'Kantor', icon: 'fa-building-columns' },
+            { data: typeof json_Pendidikan_8 !== 'undefined' ? json_Pendidikan_8 : null, type: 'Sekolah', icon: 'fa-graduation-cap' },
+            { data: typeof json_Kesehatan_7 !== 'undefined' ? json_Kesehatan_7 : null, type: 'Kesehatan', icon: 'fa-heart-pulse' },
+            { data: typeof json_SaranaIbadah_9 !== 'undefined' ? json_SaranaIbadah_9 : null, type: 'Ibadah', icon: 'fa-mosque' }
+        ];
+        pointLayers.forEach(layerCfg => {
+            if (layerCfg.data) {
+                layerCfg.data.features.forEach(f => {
+                    catalogData.push({
+                        name: f.properties.NAMOBJ,
+                        type: layerCfg.type,
+                        icon: layerCfg.icon,
+                        coords: [f.geometry.coordinates[1], f.geometry.coordinates[0]]
+                    });
+                });
+            }
+        });
+    }
+
+    function renderCatalog(items) {
+        let list = document.getElementById('catalog-list');
+        list.innerHTML = '';
+        if (items.length === 0) return;
+        
+        items.sort((a,b) => a.name.localeCompare(b.name)).forEach(item => {
+            let card = document.createElement('div');
+            card.className = 'catalog-item';
+            card.innerHTML = `<h4>${item.name}</h4><div class="badge"><i class="fa-solid ${item.icon}"></i> ${item.type}</div>`;
+            card.onclick = () => map.flyTo(item.coords, CONFIG.zoomDetail + 1, { duration: 1.5 });
+            list.appendChild(card);
+        });
+    }
+
+    function filterCatalog() {
+        let query = document.getElementById('searchInput').value.toLowerCase();
+        let filtered = catalogData.filter(i => i.name.toLowerCase().includes(query) || i.type.toLowerCase().includes(query));
+        renderCatalog(filtered);
+    }
+
+    // Tombol Home yang diperbaiki (Kembali ke Tengah Desa)
+    var HomeControl = L.Control.extend({
+        options: { position: 'topleft' },
+        onAdd: function() {
+            let div = L.DomUtil.create('div', 'compass-control');
+            div.innerHTML = '<i class="fa-solid fa-house"></i>';
+            div.title = 'Fokus ke Desa';
+            div.onclick = () => {
+                if (centerPoint) {
+                    map.flyTo(centerPoint, CONFIG.zoomMid, { duration: 1.5 });
+                } else {
+                    // Fallback jika data belum dimuat
+                    map.flyTo([-7.389, 109.594], CONFIG.zoomMid, { duration: 1.5 });
+                }
+            };
+            return div;
+        }
+    });
+    map.addControl(new HomeControl());
+
+    window.onload = function() {
+        prepareCatalogData();
+        processGeoData();
+    };
+</script>
+</body>
+</html>
